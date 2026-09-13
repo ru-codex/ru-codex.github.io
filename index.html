@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ru — Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --night:        #05060c;
+  --night-mid:     #0e1120;
+  --panel:         #10131f;
+  --amber-glow:    #ffc370;
+  --amber-warm:    #f0904a;
+  --amber-dim:     #c97a3f;
+  --bronze:        #8a5a2e;
+  --bronze-dark:   #4a3319;
+  --cream:         #f5ead2;
+  --dim:           #9a927e;
+  --live:          #7fbf8f;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; min-height:100%; }
+body{
+  font-family:Georgia,"Palatino Linotype","Times New Roman",serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:48px 16px;
+  color:var(--cream);
+  background: radial-gradient(circle at 50% 15%, #171b2e 0%, var(--night-mid) 38%, var(--night) 100%);
+  overflow-x:hidden;
+  position:relative;
+}
+
+.star{ position:fixed; color:var(--amber-glow); opacity:.5; pointer-events:none; }
+.s1{ top:8%; left:12%; font-size:14px; }
+.s2{ top:18%; right:16%; font-size:10px; }
+.s3{ bottom:14%; left:20%; font-size:11px; }
+.s4{ bottom:22%; right:10%; font-size:16px; }
+
+.wrap{ width:100%; max-width:560px; text-align:center; position:relative; z-index:1; }
+
+.kicker{
+  font-family:'Poppins',sans-serif;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--amber-dim);
+  margin-bottom:10px;
+}
+
+h1{
+  font-size:clamp(30px,6vw,42px);
+  margin:0 0 10px;
+  color:var(--cream);
+  font-weight:400;
+}
+
+.tagline{
+  color:var(--dim);
+  font-size:14.5px;
+  letter-spacing:.5px;
+  margin:0 0 40px;
+  line-height:1.6;
+}
+
+.projects{ display:flex; flex-direction:column; gap:16px; text-align:left; }
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--bronze-dark);
+  border-radius:10px;
+  padding:20px 22px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  transition:border-color .2s ease, transform .2s ease;
+}
+
+.card.linkable{ cursor:pointer; }
+.card.linkable:hover{ border-color:var(--amber-dim); transform:translateY(-1px); }
+.card.disabled{ opacity:.55; }
+
+.card-body{ flex:1; min-width:0; }
+
+.card-top{ display:flex; align-items:center; gap:10px; margin-bottom:5px; }
+
+.card-name{
+  font-family:'Poppins',sans-serif;
+  font-size:15.5px;
+  font-weight:600;
+  color:var(--cream);
+}
+
+.badge{
+  font-family:'Poppins',sans-serif;
+  font-size:9.5px;
+  letter-spacing:1px;
+  padding:2px 8px;
+  border-radius:20px;
+  flex:none;
+}
+.badge.live{ background:rgba(127,191,143,.15); color:var(--live); border:1px solid rgba(127,191,143,.4); }
+.badge.soon{ background:rgba(154,146,126,.12); color:var(--dim); border:1px solid rgba(154,146,126,.3); }
+
+.card-desc{ font-size:13px; color:var(--dim); line-height:1.5; }
+
+.arrow{
+  font-size:20px;
+  color:var(--amber-dim);
+  flex:none;
+  transition:transform .2s ease;
+}
+.card.linkable:hover .arrow{ transform:translateX(3px); color:var(--amber-glow); }
+
+a.card-link{ text-decoration:none; color:inherit; display:contents; }
+
+.foot{
+  margin-top:40px;
+  font-size:11px;
+  letter-spacing:1.5px;
+  color:var(--bronze);
+}
+.foot a{ color:var(--amber-dim); text-decoration:none; }
+.foot a:hover{ text-decoration:underline; }
+
+</style>
+</head>
+<body>
+
+  <div class="star s1">✦</div>
+  <div class="star s2">✧</div>
+  <div class="star s3">✦</div>
+  <div class="star s4">✧</div>
+
+  <div class="wrap">
+    <div class="kicker">RU'S CORNER</div>
+    <h1>What are you here for?</h1>
+    <p class="tagline">A small collection of things I've made — pick one below.</p>
+
+    <div class="projects">
+
+      <a class="card-link" href="xavier-gacha.html">
+        <div class="card linkable">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-name">Xavier Starrylight Pool</span>
+              <span class="badge live">LIVE</span>
+            </div>
+            <div class="card-desc">The birthday gacha — pull your number and see what you get.</div>
+          </div>
+          <div class="arrow">→</div>
+        </div>
+      </a>
+
+      <a class="card-link" href="xavier-quiz.html">
+        <div class="card linkable">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-name">What Xavier Card Are You?</span>
+              <span class="badge live">LIVE</span>
+            </div>
+            <div class="card-desc">A short personality quiz to find your matching card.</div>
+          </div>
+          <div class="arrow">→</div>
+        </div>
+      </a>
+
+      <a class="card-link" href="https://developers.reddit.com/apps/ottodaily-news" target="_blank" rel="noopener">
+        <div class="card linkable">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-name">Otto</span>
+              <span class="badge live">LIVE</span>
+            </div>
+            <div class="card-desc">A daily-news Reddit app, built with Devvit.</div>
+          </div>
+          <div class="arrow">→</div>
+        </div>
+      </a>
+
+      <div class="card disabled">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="card-name">Ko-fi</span>
+            <span class="badge soon">COMING SOON</span>
+          </div>
+          <div class="card-desc">Still setting this up — waiting on my PAN card.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="foot">✦ made by Ru — <a href="https://x.com/starlitbride_" target="_blank" rel="noopener">@starlitbride_</a> ✦</div>
+  </div>
+
+</body>
+</html>
