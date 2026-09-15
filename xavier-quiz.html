@@ -676,64 +676,62 @@
       font-size: 15px;
       margin-bottom: 0;
     }
-    /* Applied only during "Save card image" capture — reflows the long
-       paragraph into columns, shrinks the top info boxes, and widens
-       the whole frame so the exported PNG comes out closer to a square
-       instead of a tall rectangle. */
+    /* Applied only during "Save card image" capture — widens the frame
+       slightly and trims spacing/font sizes just enough that the
+       exported PNG lands in a tall ~4:5 box (like the quiz question
+       cards), instead of the much longer shape the on-screen scroll
+       layout naturally produces. */
     .capture-frame.compact-capture {
-      width: 760px;
-      max-width: 760px;
-      padding: 22px 26px 24px;
+      width: 560px;
+      max-width: 560px;
+      padding: 24px 24px 26px;
       box-sizing: border-box;
     }
     .capture-frame.compact-capture .result-pair {
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .capture-frame.compact-capture .info-box {
-      min-height: 46px;
-      padding: 8px 10px;
+      min-height: 70px;
+      padding: 12px 10px;
     }
     .capture-frame.compact-capture .archetype-box {
-      font-size: 14px;
-      gap: 3px;
+      font-size: 16px;
+      gap: 5px;
     }
     .capture-frame.compact-capture .archetype-box small {
-      font-size: 9.5px;
+      font-size: 11px;
     }
     .capture-frame.compact-capture .rarity-box {
-      font-size: 11px;
+      font-size: 13px;
     }
     .capture-frame.compact-capture .rarity-box span {
-      font-size: 14px;
-      margin-bottom: 1px;
+      font-size: 16px;
     }
     .capture-frame.compact-capture .corner-chibi {
-      width: 22px;
+      width: 26px;
     }
     .capture-frame.compact-capture .result-body {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     .capture-frame.compact-capture .result-body p {
-      font-size: 12.5px;
-      line-height: 1.4;
+      font-size: 13.5px;
+      line-height: 1.55;
       text-align: left;
-      column-count: 3;
-      column-gap: 20px;
     }
     .capture-frame.compact-capture .traits {
-      margin: 2px 0 10px;
-      gap: 6px;
+      margin: 4px 0 12px;
+      gap: 7px;
     }
     .capture-frame.compact-capture .trait-pill {
-      font-size: 11px;
-      padding: 7px 11px;
+      font-size: 11.5px;
+      padding: 8px 12px;
     }
     .capture-frame.compact-capture .love-lang-wrap {
-      margin-top: 8px;
+      margin-top: 10px;
     }
     .capture-frame.compact-capture .love-lang {
-      font-size: 12px;
-      padding: 7px 20px 7px 14px;
+      font-size: 12.5px;
+      padding: 8px 22px 8px 15px;
     }
     .result-actions {
       display: flex;
