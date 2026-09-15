@@ -3,201 +3,541 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ru — Projects</title>
+<title>Ru</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=EB+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
 
-:root{
-  --night:        #05060c;
-  --night-mid:     #0e1120;
-  --panel:         #10131f;
-  --amber-glow:    #ffc370;
-  --amber-warm:    #f0904a;
-  --amber-dim:     #c97a3f;
-  --bronze:        #8a5a2e;
-  --bronze-dark:   #4a3319;
-  --cream:         #f5ead2;
-  --dim:           #9a927e;
-  --live:          #7fbf8f;
-}
-
+/* ===== shared reset ===== */
 *{ box-sizing:border-box; }
 html,body{ margin:0; min-height:100%; }
-body{
-  font-family:Georgia,"Palatino Linotype","Times New Roman",serif;
+
+/* ===== LOGIN SCREEN THEME ===== */
+#login-screen{
+  --cream:       #f2e6cf;
+  --cream-light: #faf4e6;
+  --cream-dark:  #ddc9a3;
+  --gold:        #b6873f;
+  --gold-deep:   #8a6423;
+  --gold-pale:   #e6cd9c;
+  --ink:         #5a4632;
+  --ink-mute:    #9c8763;
+  --rose:        #b56673;
+  --rose-deep:   #8a4652;
+
+  font-family:'Cormorant Garamond', Georgia, serif;
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:48px 16px;
-  color:var(--cream);
-  background: radial-gradient(circle at 50% 15%, #171b2e 0%, var(--night-mid) 38%, var(--night) 100%);
-  overflow-x:hidden;
+  padding:40px 16px;
+  color:var(--ink);
+  background:
+    linear-gradient(160deg, rgba(58,38,28,.30) 0%, rgba(34,20,16,.52) 100%),
+    url('login-bg.jpg') center/cover no-repeat fixed;
   position:relative;
 }
 
-.star{ position:fixed; color:var(--amber-glow); opacity:.5; pointer-events:none; }
-.s1{ top:8%; left:12%; font-size:14px; }
-.s2{ top:18%; right:16%; font-size:10px; }
-.s3{ bottom:14%; left:20%; font-size:11px; }
-.s4{ bottom:22%; right:10%; font-size:16px; }
+#login-screen .frame-wrap{ position:relative; width:100%; max-width:380px; }
 
-.wrap{ width:100%; max-width:560px; text-align:center; position:relative; z-index:1; }
+#login-screen .flourish{ position:absolute; width:64px; height:64px; opacity:.6; z-index:2; }
+#login-screen .fl-tl{ top:-4px;  left:-4px; }
+#login-screen .fl-tr{ top:-4px;  right:-4px; transform:scaleX(-1); }
+#login-screen .fl-bl{ bottom:-4px; left:-4px; transform:scaleY(-1); }
+#login-screen .fl-br{ bottom:-4px; right:-4px; transform:scale(-1,-1); }
 
-.kicker{
-  font-family:'Poppins',sans-serif;
-  font-size:11px;
-  letter-spacing:3px;
-  color:var(--amber-dim);
-  margin-bottom:10px;
+#login-screen .card{
+  position:relative;
+  z-index:1;
+  background:linear-gradient(160deg, rgba(255,255,255,.28), rgba(255,255,255,.06) 55%, rgba(255,255,255,.14));
+  backdrop-filter:blur(4px) saturate(160%);
+  -webkit-backdrop-filter:blur(4px) saturate(160%);
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:26px;
+  padding:34px 32px;
+  text-align:center;
+  overflow:hidden;
+  box-shadow:
+    0 22px 50px rgba(20,10,5,.45),
+    inset 0 1px 0 rgba(255,255,255,.7),
+    inset 0 -18px 30px rgba(20,10,5,.08),
+    inset 0 0 0 1px rgba(255,255,255,.15);
+}
+#login-screen .card::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0;
+  height:42%;
+  background:linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));
+  pointer-events:none;
+}
+#login-screen .card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:26px;
+  padding:1px;
+  background:linear-gradient(160deg, rgba(255,255,255,.8), rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,.3));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+}
+#login-screen .card > *{ position:relative; z-index:1; }
+
+#login-screen .portrait-wrap{
+  width:100%;
+  aspect-ratio:736/414;
+  margin:0 auto 22px;
+  border-radius:28px;
+  padding:16px;
+  background:var(--cream);
+  box-shadow:
+    10px 10px 22px rgba(154,120,60,.32),
+    -10px -10px 22px rgba(255,252,240,.9);
+}
+#login-screen .portrait{
+  width:100%; height:100%;
+  border-radius:18px;
+  object-fit:cover;
+  display:block;
+  box-shadow:
+    6px 6px 14px rgba(154,120,60,.35),
+    -6px -6px 14px rgba(255,252,240,.75);
 }
 
-h1{
-  font-size:clamp(30px,6vw,42px);
-  margin:0 0 10px;
-  color:var(--cream);
-  font-weight:400;
+#login-screen .header{ margin-top:8px; }
+
+#login-screen .kicker{
+  font-family:'Cormorant Garamond', serif;
+  font-style:italic;
+  font-size:15px;
+  color:var(--rose-deep);
+  margin-bottom:2px;
 }
 
-.tagline{
-  color:var(--dim);
-  font-size:14.5px;
-  letter-spacing:.5px;
-  margin:0 0 40px;
-  line-height:1.6;
+#login-screen h1{
+  font-weight:500;
+  font-size:26px;
+  margin:0 0 8px;
+  color:var(--ink);
+  letter-spacing:.3px;
 }
 
-.projects{ display:flex; flex-direction:column; gap:16px; text-align:left; }
+#login-screen .subtitle{
+  font-family:'EB Garamond', serif;
+  font-size:30px;
+  font-weight:600;
+  letter-spacing:1px;
+  color:var(--rose-deep);
+  margin:0 0 26px;
+  text-shadow:0 1px 2px rgb(236, 124, 104), 0 0 10px rgb(245, 220, 79);
+}
 
-.card{
-  background:var(--panel);
-  border:1px solid var(--bronze-dark);
-  border-radius:10px;
-  padding:20px 22px;
+#login-screen .field{
   display:flex;
   align-items:center;
-  gap:16px;
-  transition:border-color .2s ease, transform .2s ease;
+  gap:10px;
+  background:var(--cream);
+  border:none;
+  border-radius:14px;
+  padding:14px 18px;
+  margin-bottom:14px;
+  box-shadow:
+    inset 5px 5px 10px rgba(154,120,60,.30),
+    inset -5px -5px 10px rgba(255,252,240,.85);
+}
+#login-screen .field .icon{ font-size:13px; color:var(--rose); flex:none; }
+
+#login-screen .rose-icon{
+  position:relative;
+  width:18px; height:18px;
+  flex:none;
+}
+#login-screen .rose-icon .petal{
+  position:absolute;
+  border-radius:60% 40% 60% 40% / 40% 60% 40% 60%;
+}
+#login-screen .rose-icon .p1{
+  width:14px; height:14px; top:1px; left:1px;
+  background:radial-gradient(circle at 38% 32%, #f6dee2, #cf8f98 75%);
+  transform:rotate(-10deg);
+  z-index:1;
+}
+#login-screen .rose-icon .p2{
+  width:13px; height:13px; top:0; left:4px;
+  background:radial-gradient(circle at 40% 32%, #e8b7c0, var(--rose) 75%);
+  transform:rotate(45deg);
+  z-index:2;
+}
+#login-screen .rose-icon .p3{
+  width:12px; height:12px; top:3px; left:5px;
+  background:radial-gradient(circle at 40% 32%, #d99aa6, var(--rose) 75%);
+  transform:rotate(95deg);
+  z-index:3;
+}
+#login-screen .rose-icon .p4{
+  width:10px; height:10px; top:4px; left:4px;
+  background:radial-gradient(circle at 45% 35%, var(--rose), var(--rose-deep) 75%);
+  transform:rotate(-40deg);
+  z-index:4;
+}
+#login-screen .rose-icon .p5{
+  width:7px; height:7px; top:5.5px; left:5.5px;
+  background:radial-gradient(circle at 45% 35%, var(--rose-deep), #5c2e39 75%);
+  transform:rotate(20deg);
+  z-index:5;
 }
 
-.card.linkable{ cursor:pointer; }
-.card.linkable:hover{ border-color:var(--amber-dim); transform:translateY(-1px); }
-.card.disabled{ opacity:.55; }
+#login-screen .rose-row-inline{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+  flex:none;
+}
+#login-screen .rose-row-inline .rose-icon{ width:15px; height:15px; }
+#login-screen .field input{
+  flex:1;
+  background:none;
+  border:none;
+  outline:none;
+  color:var(--ink);
+  font-family:'Poppins', sans-serif;
+  font-size:13px;
+  letter-spacing:.4px;
+}
+#login-screen .field input::placeholder{ color:var(--ink-mute); }
 
-.card-body{ flex:1; min-width:0; }
-
-.card-top{ display:flex; align-items:center; gap:10px; margin-bottom:5px; }
-
-.card-name{
-  font-family:'Poppins',sans-serif;
-  font-size:15.5px;
-  font-weight:600;
-  color:var(--cream);
+#login-screen .enter-btn{
+  display:block;
+  width:100%;
+  margin-top:20px;
+  padding:15px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(160deg, var(--rose), var(--rose-deep));
+  color:var(--cream-light);
+  font-family:'Poppins', sans-serif;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:1.5px;
+  text-decoration:none;
+  text-align:center;
+  cursor:pointer;
+  box-shadow:
+    0 10px 20px rgba(138,70,82,.4),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  transition:box-shadow .15s ease, transform .15s ease;
+}
+#login-screen .enter-btn:hover{
+  box-shadow:
+    0 6px 14px rgba(138,70,82,.35),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+#login-screen .enter-btn:active{
+  transform:translateY(1px);
 }
 
-.badge{
-  font-family:'Poppins',sans-serif;
-  font-size:9.5px;
+#login-screen .foot-note{
+  margin-top:20px;
+  font-family:'Poppins', sans-serif;
+  font-size:10px;
   letter-spacing:1px;
-  padding:2px 8px;
+  color:var(--ink-mute);
+}
+#login-screen .foot-note a{
+  color:var(--rose-deep);
+  text-decoration:none;
+  border-bottom:1px solid var(--rose);
+}
+
+/* ===== PROFILE SCREEN THEME ===== */
+#profile-screen{
+  --deep:      #221934;
+  --violet:    #3d2f57;
+  --lilac:     #a893c9;
+  --lavender:  #c9b8e6;
+  --p-cream:   #f6f1fb;
+  --moonlight: #fbf7ff;
+  --line:      rgba(246,241,251,.18);
+  --panel:     rgba(246,241,251,.06);
+
+  display:none;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  min-height:100vh;
+  justify-content:center;
+  align-items:flex-start;
+  padding:56px 16px;
+  color:var(--p-cream);
+  background:
+    linear-gradient(160deg, rgba(34,25,52,.55) 0%, rgba(61,47,87,.55) 100%),
+    url('profile-bg.jpg') center/cover no-repeat fixed;
+  overflow-x:hidden;
+  position:relative;
+}
+#profile-screen.active{ display:flex; }
+
+#profile-screen .moon{
+  position:fixed; top:6%; right:8%;
+  width:90px; height:90px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, var(--moonlight), var(--lavender) 70%);
+  box-shadow:0 0 70px 18px rgba(251,247,255,.25);
+  z-index:0;
+}
+
+#profile-screen .star{ position:fixed; color:var(--lavender); opacity:.6; z-index:0; }
+#profile-screen .star svg{ width:100%; height:100%; display:block; }
+#profile-screen .s1{ top:10%; left:8%;  width:8px; }
+#profile-screen .s2{ top:30%; right:20%; width:6px; }
+#profile-screen .s3{ bottom:14%; left:12%; width:7px; }
+#profile-screen .s4{ bottom:26%; right:10%; width:9px; }
+#profile-screen .s5{ top:55%; left:5%;  width:6px; }
+
+#profile-screen .butterfly{ position:fixed; opacity:.55; z-index:0; }
+#profile-screen .b1{ top:16%; left:20%; width:34px; transform:rotate(-8deg); }
+#profile-screen .b2{ bottom:10%; right:18%; width:26px; transform:rotate(10deg) scaleX(-1); }
+
+#profile-screen .wrap{ width:100%; max-width:460px; position:relative; z-index:1; }
+
+#profile-screen .card{
+  background:var(--panel);
+  border:1px solid var(--line);
   border-radius:20px;
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+
+#profile-screen .banner{
+  position:relative;
+  height:190px;
+  background:
+    linear-gradient(180deg, rgba(34,25,52,.15), rgba(34,25,52,.35)),
+    url('banner.jpg') center/cover no-repeat;
+}
+
+#profile-screen .banner-actions{
+  position:absolute; top:14px; right:14px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+}
+
+#profile-screen .pill-btn{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 14px;
+  border-radius:20px;
+  background:rgba(255,255,255,.85);
+  color:#3d2f57;
+  font-family:'Poppins', sans-serif;
+  font-size:12px;
+  font-weight:600;
+  text-decoration:none;
+  border:none;
+  white-space:nowrap;
+}
+
+#profile-screen .avatar-row{
+  display:flex; align-items:flex-end;
+  padding:0 24px;
+  margin-top:-38px;
+}
+
+#profile-screen .avatar{
+  width:76px; height:76px; border-radius:50%;
+  border:3px solid var(--deep);
+  background:rgba(246,241,251,.12);
   flex:none;
 }
-.badge.live{ background:rgba(127,191,143,.15); color:var(--live); border:1px solid rgba(127,191,143,.4); }
-.badge.soon{ background:rgba(154,146,126,.12); color:var(--dim); border:1px solid rgba(154,146,126,.3); }
 
-.card-desc{ font-size:13px; color:var(--dim); line-height:1.5; }
-
-.arrow{
-  font-size:20px;
-  color:var(--amber-dim);
-  flex:none;
-  transition:transform .2s ease;
+#profile-screen .info{ padding:16px 24px 16px; }
+#profile-screen .name{
+  font-family:'Poppins', sans-serif;
+  font-size:19px;
+  font-weight:600;
+  color:var(--p-cream);
+  margin:0 0 6px;
 }
-.card.linkable:hover .arrow{ transform:translateX(3px); color:var(--amber-glow); }
+#profile-screen .bio{
+  font-size:15px;
+  line-height:1.5;
+  color:var(--lavender);
+  margin:0;
+}
+#profile-screen .paragraph{
+  font-size:14px;
+  line-height:1.6;
+  color:var(--lavender);
+  margin:10px 0 0;
+  opacity:.85;
+}
 
-a.card-link{ text-decoration:none; color:inherit; display:contents; }
+#profile-screen .links{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  border-top:1px solid var(--line);
+  margin-top:20px;
+}
+#profile-screen .link-item{
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding:18px 8px;
+  text-decoration:none;
+  border-right:1px solid var(--line);
+  transition:background .2s ease;
+}
+#profile-screen .link-item:last-child{ border-right:none; }
+#profile-screen .link-item:hover{ background:rgba(246,241,251,.05); }
 
-.foot{
-  margin-top:40px;
+#profile-screen .link-icon{
+  width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(246,241,251,.08);
+  border:1px solid var(--line);
+  font-size:15px;
+  color:var(--moonlight);
+}
+
+#profile-screen .link-label{
+  font-family:'Poppins', sans-serif;
+  font-size:11px;
+  letter-spacing:.3px;
+  color:var(--p-cream);
+  text-align:center;
+  line-height:1.3;
+}
+
+#profile-screen .foot{
+  text-align:center;
+  margin-top:26px;
   font-size:11px;
   letter-spacing:1.5px;
-  color:var(--bronze);
+  color:rgba(246,241,251,.4);
 }
-.foot a{ color:var(--amber-dim); text-decoration:none; }
-.foot a:hover{ text-decoration:underline; }
+#profile-screen .foot a{ color:var(--lavender); text-decoration:none; }
+#profile-screen .foot a:hover{ text-decoration:underline; }
 
 </style>
 </head>
 <body>
 
-  <div class="star s1">✦</div>
-  <div class="star s2">✧</div>
-  <div class="star s3">✦</div>
-  <div class="star s4">✧</div>
+  <!-- ===================== LOGIN SCREEN ===================== -->
+  <div id="login-screen">
+    <div class="frame-wrap">
+      <div class="card">
 
-  <div class="wrap">
-    <div class="kicker">RU'S CORNER</div>
-    <h1>What are you here for?</h1>
-    <p class="tagline">A small collection of things I've made — pick one below.</p>
-
-    <div class="projects">
-
-      <a class="card-link" href="xavier-gacha.html">
-        <div class="card linkable">
-          <div class="card-body">
-            <div class="card-top">
-              <span class="card-name">Xavier Starrylight Pool</span>
-              <span class="badge live">LIVE</span>
-            </div>
-            <div class="card-desc">The birthday gacha — pull your number and see what you get.</div>
-          </div>
-          <div class="arrow">→</div>
+        <div class="portrait-wrap">
+          <img class="portrait" src="portrait.jpg" alt="">
         </div>
-      </a>
 
-      <a class="card-link" href="xavier-quiz.html">
-        <div class="card linkable">
-          <div class="card-body">
-            <div class="card-top">
-              <span class="card-name">What Xavier Card Are You?</span>
-              <span class="badge live">LIVE</span>
-            </div>
-            <div class="card-desc">A short personality quiz to find your matching card.</div>
-          </div>
-          <div class="arrow">→</div>
+        <div class="header">
+          <p class="subtitle">WELCOME</p>
         </div>
-      </a>
 
-      <a class="card-link" href="https://developers.reddit.com/apps/ottodaily-news" target="_blank" rel="noopener">
-        <div class="card linkable">
-          <div class="card-body">
-            <div class="card-top">
-              <span class="card-name">Otto</span>
-              <span class="badge live">LIVE</span>
-            </div>
-            <div class="card-desc">A daily-news Reddit app, built with Devvit.</div>
-          </div>
-          <div class="arrow">→</div>
+        <div class="field">
+          <span class="rose-row-inline">
+            <span class="rose-icon"><span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span><span class="petal p5"></span></span>
+            <span class="rose-icon"><span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span><span class="petal p5"></span></span>
+            <span class="rose-icon"><span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span><span class="petal p5"></span></span>
+            <span class="rose-icon"><span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span><span class="petal p5"></span></span>
+            <span class="rose-icon"><span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span><span class="petal p5"></span></span>
+          </span>
+          <input type="text" placeholder="">
         </div>
-      </a>
+        <div class="field">
+          <span class="icon">♛</span>
+          <input type="text" id="secretInput" placeholder="••••">
+        </div>
 
-      <div class="card disabled">
-        <div class="card-body">
-          <div class="card-top">
-            <span class="card-name">Ko-fi</span>
-            <span class="badge soon">COMING SOON</span>
+        <a class="enter-btn" href="#" id="loginBtn">Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PROFILE SCREEN ===================== -->
+  <div id="profile-screen">
+
+    <div class="moon"></div>
+    <div class="star s1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
+    <div class="star s2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
+    <div class="star s3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
+    <div class="star s4"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
+    <div class="star s5"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
+
+    <svg class="butterfly b1" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 40C40 10 10 5 5 20C0 35 30 45 50 40Z" fill="#f6f1fb" opacity=".8"/>
+      <path d="M50 40C60 10 90 5 95 20C100 35 70 45 50 40Z" fill="#f6f1fb" opacity=".8"/>
+      <path d="M50 40C42 55 15 65 12 55C9 47 30 42 50 40Z" fill="#c9b8e6" opacity=".7"/>
+      <path d="M50 40C58 55 85 65 88 55C91 47 70 42 50 40Z" fill="#c9b8e6" opacity=".7"/>
+      <line x1="50" y1="30" x2="50" y2="55" stroke="#a893c9" stroke-width="2"/>
+    </svg>
+    <svg class="butterfly b2" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 40C40 10 10 5 5 20C0 35 30 45 50 40Z" fill="#f6f1fb" opacity=".8"/>
+      <path d="M50 40C60 10 90 5 95 20C100 35 70 45 50 40Z" fill="#f6f1fb" opacity=".8"/>
+      <path d="M50 40C42 55 15 65 12 55C9 47 30 42 50 40Z" fill="#c9b8e6" opacity=".7"/>
+      <path d="M50 40C58 55 85 65 88 55C91 47 70 42 50 40Z" fill="#c9b8e6" opacity=".7"/>
+      <line x1="50" y1="30" x2="50" y2="55" stroke="#a893c9" stroke-width="2"/>
+    </svg>
+
+    <div class="wrap">
+      <div class="card">
+
+        <div class="banner">
+          <div class="banner-actions">
+            <a class="pill-btn" href="https://x.com/starlitbride_" target="_blank" rel="noopener">Follow +</a>
+            <a class="pill-btn" href="https://starlitbride.straw.page" target="_blank" rel="noopener">
+              <svg viewBox="0 0 100 100" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 20 L28 55" stroke="#3d2f57" stroke-width="9" stroke-linecap="round" fill="none"/>
+                <path d="M60 15 L72 58" stroke="#3d2f57" stroke-width="9" stroke-linecap="round" fill="none"/>
+                <path d="M15 68 Q50 105 88 60" stroke="#3d2f57" stroke-width="9" stroke-linecap="round" fill="none"/>
+              </svg>
+            </a>
+            <!-- Replace href with wherever your "Text" link should go -->
+            <a class="pill-btn" href="#" target="_blank" rel="noopener">Text me ♡</a>
+            <!-- Replace href with your real Ko-fi link when it's ready -->
+            <a class="pill-btn" href="#" target="_blank" rel="noopener">✦ Ko-fi</a>
           </div>
-          <div class="card-desc">Still setting this up — waiting on my PAN card.</div>
         </div>
+
+        <div class="avatar-row">
+          <div class="avatar"></div>
+        </div>
+
+        <div class="info">
+          <p class="name">Ru</p>
+          <p class="bio">Welcome to my page ✯ </p>
+          <p class="paragraph"> Here, you will find various of my work~~ head to Xavier quiz to find what Xavier card matches your personality; or to Xavier Gacha — to try your luck to see if you get a Xavier prompt, card orrr shhh! *secret*.
+             </p>
+            <p class="paragraph">Another of my works is OttoDaily-news, a Devvit automated app to post Love and Deepspace news in subreddit.</p>
+            <p class="paragraph">If you enjoyed what you found here, come say hi, follow along, or toss a little something my way on Ko-fi — every bit helps keep this girl's rent paid ✦</p>
+        </div>
+
+        <div class="links">
+          <a class="link-item" href="https://developers.reddit.com/apps/ottodaily-news" target="_blank" rel="noopener">
+            <div class="link-icon">☾</div>
+            <div class="link-label">Otto</div>
+          </a>
+          <a class="link-item" href="https://starlightkisses.github.io/xavier-quiz.html">
+            <div class="link-icon">✧</div>
+            <div class="link-label">Xavier Quiz</div>
+          </a>
+          <a class="link-item" href="https://starlightkisses.github.io/xavier-gacha.html">
+            <div class="link-icon">✦</div>
+            <div class="link-label">Xavier Gacha</div>
+          </a>
+        </div>
+
       </div>
 
+      <div class="foot">✦ made by Ru — <a href="https://x.com/starlitbride_" target="_blank" rel="noopener">@starlitbride_</a> ✦</div>
     </div>
-
-    <div class="foot">✦ made by Ru — <a href="https://x.com/starlitbride_" target="_blank" rel="noopener">@starlitbride_</a> ✦</div>
   </div>
+
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', function(e){
+      e.preventDefault();
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('profile-screen').classList.add('active');
+    });
+  </script>
 
 </body>
 </html>
