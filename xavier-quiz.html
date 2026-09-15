@@ -677,23 +677,48 @@
       margin-bottom: 0;
     }
     /* Applied only during "Save card image" capture — reflows the long
-       paragraph into two columns and tightens spacing so the exported
-       PNG comes out closer to a square instead of a tall rectangle. */
+       paragraph into columns, shrinks the top info boxes, and widens
+       the whole frame so the exported PNG comes out closer to a square
+       instead of a tall rectangle. */
     .capture-frame.compact-capture {
-      padding: 18px 16px 20px;
+      width: 760px;
+      max-width: 760px;
+      padding: 22px 26px 24px;
+      box-sizing: border-box;
     }
     .capture-frame.compact-capture .result-pair {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .capture-frame.compact-capture .info-box {
+      min-height: 46px;
+      padding: 8px 10px;
+    }
+    .capture-frame.compact-capture .archetype-box {
+      font-size: 14px;
+      gap: 3px;
+    }
+    .capture-frame.compact-capture .archetype-box small {
+      font-size: 9.5px;
+    }
+    .capture-frame.compact-capture .rarity-box {
+      font-size: 11px;
+    }
+    .capture-frame.compact-capture .rarity-box span {
+      font-size: 14px;
+      margin-bottom: 1px;
+    }
+    .capture-frame.compact-capture .corner-chibi {
+      width: 22px;
     }
     .capture-frame.compact-capture .result-body {
       margin-bottom: 4px;
     }
     .capture-frame.compact-capture .result-body p {
       font-size: 12.5px;
-      line-height: 1.42;
+      line-height: 1.4;
       text-align: left;
-      column-count: 2;
-      column-gap: 22px;
+      column-count: 3;
+      column-gap: 20px;
     }
     .capture-frame.compact-capture .traits {
       margin: 2px 0 10px;
@@ -1788,14 +1813,21 @@ $("result-rarity").innerHTML =
     $("retry-btn").onclick = resetQuiz;
 
     $("download-btn").onclick = () => {
-      const captureEl = $("capture-area");
-      captureEl.classList.add("compact-capture");
+      const original = $("capture-area");
+      const clone = original.cloneNode(true);
+      clone.removeAttribute("id");
+      clone.classList.add("compact-capture");
+      clone.style.position = "fixed";
+      clone.style.top = "0";
+      clone.style.left = "-9999px";
+      clone.style.margin = "0";
+      document.body.appendChild(clone);
 
-      // Give the browser a moment to reflow into the compact layout
-      // before html2canvas reads its dimensions.
+      // Give the browser a moment to lay out the clone at its new,
+      // wider size before html2canvas reads its dimensions.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          html2canvas(captureEl, { backgroundColor: null, scale: 2 })
+          html2canvas(clone, { backgroundColor: null, scale: 2 })
             .then(canvas => {
               const a = document.createElement("a");
               a.download = "xavier-result.png";
@@ -1803,7 +1835,7 @@ $("result-rarity").innerHTML =
               a.click();
             })
             .finally(() => {
-              captureEl.classList.remove("compact-capture");
+              document.body.removeChild(clone);
             });
         });
       });
