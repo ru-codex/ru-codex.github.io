@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Which Xavier Are You?</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Pliant:wght@400;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #dfeaf4;
+      --panel: #e9f3ff;
+      --panel2: #d7e9f7;
+      --edge: #a9c4df;
+      --gold: #c99d58;
+      --ink: #302a57;
+      --dim: #68698b;
+      --muted: #8588a5;
+      --white: #fff;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html,
+    body {
+      min-height: 100%;
+    }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter,sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 28px 18px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body:before,
+    body:after {
+      content: "";
+      position: fixed;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(2px);
+      opacity: .3;
+      z-index: 0;
+    }
+    body:before {
+      left: -150px;
+      top: 8%;
+      background: radial-gradient(circle,rgba(150,181,220,.75),transparent 68%);
+    }
+    body:after {
+      right: -140px;
+      bottom: 4%;
+      background: radial-gradient(circle,rgba(207,178,214,.7),transparent 68%);
+    }
+    .bg-fixed {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(rgba(20,15,35,.12),rgba(20,15,35,.12)),url('bg1.jpg') center/cover no-repeat;
+      pointer-events: none;
+    }
+    .stage {
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+      z-index: 1;
+    }
+    .frame {
+      position: relative;
+      background: linear-gradient(145deg,#e9f3ff 0%,#d7e9f7 52%,#e7eefc 100%);
+      border: 1px solid rgba(130,161,194,.55);
+      border-radius: 26px;
+      padding: 48px 38px 38px;
+      overflow: hidden;
+      box-shadow: 0 24px 55px rgba(74,96,123,.2),inset 0 1px 0 rgba(255,255,255,.85);
+    }
+    .frame:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 9%;
+      right: 9%;
+      height: 4px;
+      border-radius: 0 0 8px 8px;
+      background: linear-gradient(90deg,transparent,var(--gold),#9da6d5,var(--gold),transparent);
+    }
+    .frame:after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px dashed rgba(119,145,178,.3);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+    .star-decor,
+    .floral-decor {
+      position: absolute;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .star-decor {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+    }
+    .star-decor svg {
+      width: 100%;
+      height: 100%;
+    }
+    .floral-decor {
+      width: 125px;
+      height: 125px;
+      opacity: .78;
+    }
+    .floral-decor svg {
+      width: 100%;
+      height: 100%;
+    }
+    .top-left {
+      top: -12px;
+      left: -12px;
+      transform: rotate(-12deg);
+    }
+    .top-right {
+      right: 8px;
+      top: 28px;
+      transform: rotate(25deg) scale(.72);
+      opacity: .55;
+    }
+    .bottom-left {
+      left: 2px;
+      bottom: 28px;
+      transform: rotate(-30deg) scale(.7);
+      opacity: .55;
+    }
+    .bottom-right {
+      right: -10px;
+      bottom: -15px;
+      transform: rotate(168deg);
+    }
+    .screen {
+      position: relative;
+      z-index: 2;
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: paperIn .32s ease both;
+    }
+    .kicker {
+      font-family: Fraunces,serif;
+      font-style: italic;
+      color: #a47b3f;
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+    h1.title {
+      font-family: Fraunces,serif;
+      font-weight: 600;
+      color: var(--ink);
+      font-size: clamp(30px,6vw,38px);
+      line-height: 1.12;
+      margin-bottom: 14px;
+      letter-spacing: -.02em;
+    }
+    .intro-copy {
+      color: var(--dim);
+      font-size: 15px;
+      margin-bottom: 28px;
+      max-width: 46ch;
+    }
+    .intro-image-wrap {
+      margin: 18px 0 26px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(130,161,194,.4);
+      box-shadow: 0 8px 20px rgba(74,96,123,.15);
+    }
+    .intro-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .intro-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .start-btn,
+    .secondary-btn {
+      background: rgba(255,255,255,.45);
+  color: #4d4b70;
+  border: 1px solid rgba(126,153,186,.45);
+  padding: 12px 22px;
+    }
+
+    #other-works-btn,
+#kofi-btn {
+  text-decoration: none;
+  font-size: 13px;
+  padding: 8px 16px;
+
+}
+    .start-btn
+     {
+  background: #d5a75f;
+  color: #332714;
+  border: 0;
+  padding: 14px 26px;
+  box-shadow: 0 6px 14px rgba(154,115,54,.18);
+}
+      .start-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    background:rgba(255,255,255,.55);
+    color:#302a57;
+    border:1px solid rgba(126,153,186,.5);
+    box-shadow:0 6px 14px rgba(154,115,54,.12);
+  }
+  .start-btn-wrap{
+  position:relative;
+  display:inline-block;
+}
+
+.begin-star{
+  position:absolute;
+  top:-34px;
+  left:-24px;
+  height:50px;
+  pointer-events:none;
+}
+
+.begin-bunny{
+  position:absolute;
+  bottom:-28px;
+  right:-24px;
+  height:60px;
+  pointer-events:none;
+}
+  .begin-bunny {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  display: block;
+  margin-left: 4px;
+}
+
+.blobbu-left{
+  position:absolute;
+  bottom:-18px;
+  left:-40px;
+  height:70px;
+  pointer-events:none;
+}
+.blobbu-right{
+  position:absolute;
+  bottom:-18px;
+  right:-40px;
+  height:70px;
+  pointer-events:none;
+}
+
+  .start-btn:hover{
+  box-shadow:
+    3px 3px 8px rgba(163,177,198,.5),
+    -3px -3px 8px rgba(255,255,255,.85);
+}
+  
+    
+.start-btn {
+  background: #e3eefc;
+  color: var(--ink);
+  border: none;
+  box-shadow:
+    14px 14px 28px rgba(140,157,184,.65),
+    -10px -10px 22px rgba(255,255,255,1);
+}
+
+    .secondary-btn {
+      background: rgba(255,255,255,.45);
+      color: #4d4b70;
+      border: 1px solid rgba(126,153,186,.45);
+      padding: 12px 22px;
+    }
+    .start-btn:hover,
+    .secondary-btn:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 8px 17px rgba(154,115,54,.16);
+    }
+    .again-btn,
+    .download-btn {
+      background: linear-gradient(180deg, #cfd6f5 0%, #a9b3e8 100%);
+      color: #34325a;
+      font-weight: 600;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 26px;
+      box-shadow:
+        0 4px 8px rgba(80,90,160,.35),
+        inset 0 1px 1px rgba(255,255,255,.6),
+        inset 0 -2px 4px rgba(60,60,110,.25);
+    }
+    .again-btn:hover,
+    .download-btn:hover {
+      filter: brightness(1.05);
+    }
+    button:active {
+      transform: scale(.98);
+    }
+    .share-block {
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: #5c2a55;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+    .credit-block,
+    .pool-block,
+    .disclaimer-block {
+      text-align: center;
+      margin-top: 26px;
+      padding: 0 8px;
+      color: #552e58;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .pool-block {
+  font-size: 10px;
+}
+    .credit-block {
+      font-family: 'PT Serif',serif;
+      font-weight: 700;
+      color: #2c2a49;
+      font-size: 13px;
+    }
+    .credit-link {
+  color: inherit;
+  text-decoration: none;
+}
+    .pool-block,
+    .disclaimer-block {
+      font-family: Pliant,Inter,sans-serif;
+      font-weight: 700;
+    }
+    .progress-track {
+      height: 5px;
+      background: rgba(111,133,169,.18);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 26px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg,#9ba8d6,#d2ad72);
+      width: 0;
+      transition: width .4s ease;
+    }
+    .q-meta {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-bottom: 10px;
+    }
+    .q-text {
+      font-family: Fraunces,serif;
+      font-weight: 500;
+      color: var(--ink);
+      font-size: clamp(20px,4.5vw,24px);
+      line-height: 1.35;
+      margin-bottom: 24px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option {
+  text-align: left;
+  background: linear-gradient(180deg, #8162c5 0%, #9ba8d6 55%, #8d72b157 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 15px 18px;
+  border-radius: 999px;
+  font-family: Inter,sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  transition: .12s ease;
+  box-shadow:
+    0 5px 0 rgba(90,95,150,.6),
+    0 9px 16px rgba(74,96,123,.25),
+    inset 0 2px 2px rgba(255,255,255,.65);
+}
+.option:hover {
+  background: linear-gradient(180deg, #cdd5f5 0%, #a3b0dd 55%, #9098c9 100%);
+  box-shadow:
+    0 5px 0 rgba(90,95,150,.6),
+    0 11px 18px rgba(74,96,123,.3),
+    inset 0 2px 2px rgba(255,255,255,.7);
+}
+.option:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 rgba(90,95,150,.6),
+    0 5px 10px rgba(74,96,123,.25),
+    inset 0 2px 2px rgba(255,255,255,.5);
+}
+    .option.selected {
+  background: linear-gradient(180deg, #d9c8f3 0%, #b99bd9 55%, #a683c9 100%);
+  box-shadow:
+    0 5px 0 rgba(120,80,150,.6),
+    0 9px 16px rgba(74,96,123,.25),
+    inset 0 2px 2px rgba(255,255,255,.65);
+}
+    .preview-intro {
+      color: var(--dim);
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .preview-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-bottom: 18px;
+    }
+    .preview-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(126,153,186,.32);
+      color: #383557;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-family: Inter,sans-serif;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+    .preview-item:hover {
+      border-color: rgba(161,130,75,.55);
+      background: rgba(255,255,255,.78);
+    }
+    .pi-num {
+      color: #a47b3f;
+      font-size: 12px;
+      margin-right: 8px;
+      font-weight: 600;
+    }
+    .result-intro {
+      text-align: center;
+      font-family: Fraunces,serif;
+      font-style: italic;
+      color: #a47b3f;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .result-title {
+      text-align: center;
+      font-family: Fraunces,serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: clamp(28px,7vw,36px);
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+    .capture-frame {
+      border-radius: 19px;
+      padding: 22px 20px 24px;
+      text-align: center;
+      background: linear-gradient(145deg,#e5f1ff,#d2e5f4 55%,#e4e8fa);
+      border: 1px solid rgba(126,153,186,.48);
+      margin-bottom: 20px;
+      box-shadow: 0 8px 22px rgba(75,101,133,.12),inset 0 1px 0 rgba(255,255,255,.8);
+    }
+           .card-visual {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 7px 18px rgba(61,76,103,.18);
+    }
+    .card-art {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .result-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+            .result-pair-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-pair-right .info-box {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff 0%, #eaf4ff 45%, #cfe4f5 100%);
+      border: 1px solid rgba(126,153,186,.5);
+      box-shadow:
+        0 6px 14px rgba(74,96,123,.25),
+        inset 0 2px 3px rgba(255,255,255,.95),
+        inset 0 -7px 10px rgba(126,153,186,.4);
+    }
+    .result-pair-right .info-box::before {
+      content: "";
+      position: absolute;
+      top: 8%;
+      left: 10%;
+      width: 55%;
+      height: 26%;
+      background: rgba(255,255,255,.7);
+      border-radius: 50%;
+      filter: blur(5px);
+      pointer-events: none;
+    }
+          
+    .info-box {
+  position: relative;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.52);
+  border: 1px solid rgba(126,153,186,.34);
+  color: #383557;
+}
+    .archetype-box {
+      font-family: Fraunces,serif;
+      font-style: italic;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.2;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .archetype-box strong {
+      font-weight: 600;
+    }
+    .archetype-box small {
+      font-family: Inter,sans-serif;
+      font-style: normal;
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: var(--dim);
+      font-weight: 500;
+    }
+    .rarity-box {
+      font-family: Inter,sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a47b3f;
+      line-height: 1.35;
+    }
+    .rarity-box span {
+      display: block;
+      font-size: 18px;
+      color: #8c6a36;
+      margin-bottom: 2px;
+    }
+
+    .box-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.box-wrap .info-box {
+  flex: 1;
+  width: 100%;
+}
+    .corner-chibi {
+  position: absolute;
+  width: 30px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(74,96,123,.3));
+  z-index: 3;
+}
+.rarity-chibi {
+  top: 4px;
+  left: 4px;
+}
+.archetype-chibi {
+  bottom: 4px;
+  right: 4px;
+}
+        .traits {
+      display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 18px;
+    }
+    .trait-pill {
+  border: none;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #eef5fd, #dbe8f6);
+  box-shadow:
+    8px 8px 16px rgba(140,157,184,.6),
+    -6px -6px 14px rgba(255,255,255,1);
+  text-align: center;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  
+    }
+    .love-lang {
+      display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: #523268af;
+  padding: 9px 26px 9px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgb(235, 238, 238), rgba(157,166,213,.16));
+  border: 1px solid rgba(159, 6, 197, 0.493);
+    }
+    .love-lang-wrap {
+  position: relative;
+  display: inline-block;
+  margin-top: 14px;
+}
+
+.love-lang-chibi {
+  position: absolute;
+  top: -34px;
+  right: -18px;
+  width: 54px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(74,96,123,.25));
+}
+    .result-body p {
+      color: var(--dim);
+      font-size: 15px;
+      margin-bottom: 0;
+    }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .result-actions>* {
+      flex: 1;
+      min-width: 0;
+    }
+    .result-actions .again-btn,
+    .result-actions .download-btn {
+      width: 100%;
+    }
+    .note {
+      text-align: center;
+      color: #727995;
+      font-size: 12px;
+      margin-top: 18px;
+      line-height: 1.6;
+      padding: 0 8px;
+    }
+    @keyframes paperIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .progress-fill,
+      .screen.active {
+        transition: none;
+        animation: none;
+      }
+    }
+    @media(max-width:600px) {
+      body {
+        padding: 50px 26px 74px;
+      }
+      .frame {
+        border-radius: 24px;
+        padding: 40px 24px 30px;
+      }
+      .floral-decor {
+        width: 105px;
+        height: 105px;
+      }
+      .top-right,
+      .bottom-left {
+        display: none;
+      }
+      .q-text {
+        font-size: 22px;
+      }
+      .option {
+        padding: 14px 15px;
+        font-size: 14px;
+      }
+      .result-pair {
+        grid-template-columns: 1fr 1fr;
+      }
+      .result-actions {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.result-actions>* {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+      .result-title {
+        font-size: 31px;
+      }
+      .card-visual {
+        max-width: 100%;
+      }
+      .note {
+        font-size: 10.5px;
+        margin-top: 14px;
+      }
+    }
+    @media (max-width: 480px) {
+  .result-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .again-btn,
+  .download-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .blobbu-left,
+  .blobbu-right {
+    height: 26px;
+    bottom: -6px;
+  }
+  .blobbu-left {
+    left: -10px;
+  }
+  .blobbu-right {
+    right: -10px;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <div class="bg-fixed" aria-hidden="true"></div>
+
+  <div class="stage">
+    <div class="frame">
+
+      <!-- decorative star trail -->
+      <div class="star-decor" aria-hidden="true">
+        <svg viewBox="0 0 560 100" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="20" x2="110" y2="50" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".75"/>
+          <circle cx="115" cy="52" r="3" fill="#fff"/>
+          <circle cx="260" cy="14" r="2" fill="#fff" opacity=".8"/>
+          <circle cx="330" cy="40" r="1.6" fill="#fff" opacity=".6"/>
+          <circle cx="400" cy="12" r="2.4" fill="#fff" opacity=".9"/>
+          <circle cx="470" cy="34" r="1.6" fill="#fff" opacity=".65"/>
+          <circle cx="180" cy="8" r="1.6" fill="#fff" opacity=".7"/>
+        </svg>
+      </div>
+
+      <!-- decorative florals -->
+      <div class="floral-decor top-left" aria-hidden="true">
+        <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 125C42 104 55 81 65 50" fill="none" stroke="#789b83" stroke-width="3" stroke-linecap="round"/>
+          <path d="M47 102C30 93 23 81 24 68C40 72 49 83 47 102Z" fill="#a8c6a7"/>
+          <path d="M54 84C70 73 80 60 78 47C63 52 55 65 54 84Z" fill="#8fb5a0"/>
+          <g transform="translate(78 36)">
+            <circle r="8" fill="#d6ad72"/>
+            <ellipse cy="-17" rx="9" ry="16" fill="#b7b4d9"/>
+            <ellipse cx="16" rx="16" ry="9" fill="#c6c5e2"/>
+            <ellipse cy="17" rx="9" ry="16" fill="#aaaed3"/>
+            <ellipse cx="-16" rx="16" ry="9" fill="#d0cfe8"/>
+          </g>
+          <g transform="translate(28 55) scale(.65)">
+            <circle r="7" fill="#d6ad72"/>
+            <ellipse cy="-16" rx="8" ry="14" fill="#d8b0c8"/>
+            <ellipse cx="15" rx="14" ry="8" fill="#cfa8c3"/>
+            <ellipse cy="16" rx="8" ry="14" fill="#dfbfd2"/>
+            <ellipse cx="-15" rx="14" ry="8" fill="#d6b2ca"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="floral-decor top-right" aria-hidden="true">
+        <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <path d="M112 8C93 38 82 67 79 119" fill="none" stroke="#789b83" stroke-width="3"/>
+          <path d="M89 66C104 57 114 48 115 36C101 38 91 48 89 66Z" fill="#a9c7a8"/>
+          <path d="M82 88C67 78 59 67 60 56C74 60 82 71 82 88Z" fill="#91b6a1"/>
+          <circle cx="61" cy="30" r="8" fill="#d5ab70"/>
+          <circle cx="61" cy="30" r="19" fill="none" stroke="#aaaed3" stroke-width="9" stroke-dasharray="18 7"/>
+        </svg>
+      </div>
+
+      <div class="floral-decor bottom-left" aria-hidden="true">
+        <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <path d="M35 137C47 107 63 84 89 58" fill="none" stroke="#789b83" stroke-width="3"/>
+          <path d="M50 103C34 98 25 88 24 77C39 79 49 89 50 103Z" fill="#a8c6a7"/>
+          <path d="M62 87C78 82 88 73 90 62C75 64 65 73 62 87Z" fill="#91b6a1"/>
+        </svg>
+      </div>
+
+      <div class="floral-decor bottom-right" aria-hidden="true">
+        <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 130C43 111 60 89 72 54" fill="none" stroke="#789b83" stroke-width="3"/>
+          <path d="M46 105C29 98 21 87 22 74C37 78 46 89 46 105Z" fill="#a7c5a6"/>
+          <path d="M57 85C72 77 81 66 80 54C66 57 57 69 57 85Z" fill="#91b5a0"/>
+          <g transform="translate(83 43)">
+            <circle r="8" fill="#d6ad72"/>
+            <ellipse cy="-17" rx="9" ry="15" fill="#d2b0c9"/>
+            <ellipse cx="16" rx="15" ry="9" fill="#c6afd0"/>
+            <ellipse cy="17" rx="9" ry="15" fill="#dfbfd5"/>
+            <ellipse cx="-16" rx="15" ry="9" fill="#d6b5cd"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ===== INTRO SCREEN ===== -->
+      <div class="screen active" id="screen-intro">
+        <div class="kicker">a not-so-scientific pull</div>
+        <h1 class="title">Which Xavier are you?</h1>
+
+        <div class="intro-image-wrap">
+          <img src="xavier-cat.png" alt="Which Xavier are you" class="intro-image">
+        </div>
+
+        <div class="intro-buttons">
+  <div class="start-btn-wrap">
+    <img src="sleepy-star.png" alt="" class="begin-star">
+    <button class="start-btn" id="start-btn">Lets begin!✰</button>
+    <img src="bunbun.png" alt="" class="begin-bunny">
+  </div>
+</div>
+
+<div class="intro-buttons" style="margin-top:14px;">
+  <a href="#" class="start-btn" id="other-works-btn">My other works</a>
+  <a href="#" class="start-btn" id="kofi-btn">Ko-fi</a>
+</div>
+        
+
+        <div class="credit-block">
+            <a href="https://twitter.com/starlitbride_" target="_blank" class="credit-link"> Designed &amp; created by Ru @starlitbride_ for Xavier's Birthday</a> 
+        </div>
+        <div class="pool-block">
+          [The quiz contains a pool of all 5-star cards of Xavier. This is an unofficial fan content made to celebrate Xavier's Birthday.The personality quiz is made simply for fun - kindly do not take it seriously.]
+        </div>
+        
+      </div>
+
+      
+
+      <!-- ===== QUIZ SCREEN ===== -->
+      <div class="screen" id="screen-quiz">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="q-meta">
+          <span id="q-number">Question 1 of 14</span>
+        </div>
+        <div class="q-text" id="q-text"></div>
+        <div class="options" id="q-options"></div>
+      </div>
+
+      <!-- ===== RESULT SCREEN ===== -->
+      <div class="screen" id="screen-result">
+         <div class="share-block">Share your result online using #Xavier1016HappyBirthday or #HappyOctovier.</div>
+        <div class="result-intro">You got</div>
+        <div class="result-title" id="result-name"></div>
+
+                        <div id="capture-area" class="capture-frame">
+          <div class="result-pair">
+            <div class="card-visual">
+              <img id="card-art" class="card-art" src="" alt="Xavier card art">
+            </div>
+                                  <div class="result-pair-right">
+              <div class="box-wrap">
+                <div class="info-box rarity-box" id="result-rarity"></div>
+                <img src="kitty-xavier.png" alt="" class="corner-chibi rarity-chibi">
+              </div>
+              <div class="box-wrap">
+                <div class="info-box archetype-box" id="result-archetype"></div>
+                <img src="prince-xavier.png" alt="" class="corner-chibi archetype-chibi">
+              </div>
+            </div>
+            </div>
+
+          <div class="result-body">
+            <p id="result-desc"></p>
+          </div>
+
+          <div class="traits" id="result-traits"></div>
+          <div class="love-lang-wrap">
+          <div class="love-lang" id="result-love"></div>
+          <img src="xavier-chibi-heart.png" alt="" class="love-lang-chibi">
+</div>
+        </div>
+
+        <div class="result-actions">
+  <span style="position:relative; display:inline-block;">
+    <img src="blobbu1.png" alt="" class="blobbu-left">
+    <button class="again-btn" id="retry-btn">Pull again</button>
+  </span>
+  <span style="position:relative; display:inline-block;">
+    <button class="download-btn" id="download-btn">Save card image</button>
+    <img src="blobbu2.png" alt="" class="blobbu-right">
+  </span>
+  
+        </div>
+        <div class="credit-block"><a href="https://twitter.com/starlitbride_" target="_blank" class="credit-link"> Designed &amp;  created by Ru @starlitbride_  for Xavier's Birthday </a></div>
+      </div>
+
+    </div>
+
+    <footer class="note">Unofficial fan-made personality quiz. Results are illustrative and for fun.</footer>
+  </div>
+
+  <script>
+
+    /* ===== data ===== */
+
+    const CARDS = {
+      "runaway-hearts": {
+        name: "Runaway Hearts",
+        archetype: "The Reckless Romantic",
+        rarity: "58%",
+        tagline: "You'd rather risk everything than spend your life wondering \"what if?\"",
+        desc: "You have a rebellious streak that becomes impossible to ignore when someone tries to decide your life for you. Rules, expectations, family obligations, social conventions—you can tolerate them until they stand between you and something you genuinely want. Then you become surprisingly fearless. You're playful when things are light, but there is steel underneath that charm: once you've made a choice, you're willing to accept the consequences yourself rather than surrender it to someone else's decision. You don't run because you're afraid of life. You run toward the life you've chosen.",
+        traits: ["Rebellious", "Daring", "Romantic"],
+        love: "Quality time",
+        image: "Runaway_Hearts.jpg",
+        vector: { W: 6, I: 7, P: 7, G: 3, R: 6, S: 2 }
+      },
+      "sunken-glow": {
+        name: "Sunken Glow",
+        archetype: "The Quiet Idealist",
+        rarity: "64%",
+        tagline: "You find something worth saving even in places everyone else has given up on.",
+        desc: "You're softer than you initially appear, but your softness isn't passive. You notice what is neglected—the dying garden, the forgotten place, the little things everyone else has stopped caring about—and something in you wants to preserve it. You're also mischievous in a very understated way; you enjoy keeping a few cards hidden and watching people discover them for themselves. You can be surprisingly romantic, but you don't need grand declarations. You'd rather quietly create something beautiful and then let someone you trust discover it beside you.",
+        traits: ["Idealistic", "Playful", "Nurturing"],
+        love: "Quality time",
+        image: "Sunken_Glow.webp",
+        vector: { W: 6, I: 7, P: 3, G: 7, R: 6, S: 6 }
+      },
+      "tranquil-moments": {
+        name: "Tranquil Moments",
+        archetype: "The Grounded Soul",
+        rarity: "72%",
+        tagline: "You understand that peace isn't boring—it's something worth protecting.",
+        desc: "You don't need constant excitement to feel fulfilled. You're happiest when life slows down enough for you to actually notice it: a good meal, a quiet room, familiar company, the simple comfort of knowing someone is waiting for you. You're practical and remarkably accepting of life's difficulties. Rather than obsessing over everything that has gone wrong, you have a tendency to ask, \"What can we still do now?\" There's a quiet maturity to you. You understand that survival isn't just about fighting—it's also about continuing to live.",
+        traits: ["Grounded", "Patient", "Content"],
+        love: "Quality time",
+        image: "Tranquil_Moments.webp",
+        vector: { W: 6, I: 2, P: 3, G: 4, R: 4, S: 9 }
+      },
+      "blades-with-blossoms": {
+        name: "Blades with Blossoms",
+        archetype: "The Gentle Protector",
+        rarity: "61%",
+        tagline: "You have sharp edges, but you choose carefully where to use them.",
+        desc: "You're capable of being intimidating when you need to be, but you don't actually enjoy hurting people. Your strength exists primarily to protect the things you find precious. You're also more playful and generous than your serious exterior suggests—you'll tease, feed, teach, and quietly look after people without making a grand announcement of it. You don't believe tenderness and strength are opposites. To you, the strongest person in the room is often the one who knows when to put the sword down.",
+        traits: ["Protective", "Gentle", "Principled"],
+        love: "Acts of service",
+        image: "Blades_with_Blossoms.webp",
+        vector: { W: 7, I: 7, P: 2, G: 6, R: 5, S: 6 }
+      },
+      "eulogy-of-light": {
+        name: "Eulogy of Light",
+        archetype: "The Devotional Idealist",
+        rarity: "18%",
+        tagline: "When you believe in something, you give it your whole heart.",
+        desc: "You are intensely sincere. You don't particularly enjoy shallow affection, casual promises, or saying things simply because they sound nice. If you commit yourself—to a person, a principle, a cause—you take that commitment seriously. You can carry enormous emotional weight without displaying it, and there is something almost old-fashioned about the way you approach loyalty. You'd rather suffer quietly than betray something you believe is worth protecting. Your greatest strength is conviction; your greatest weakness is that once your heart has decided something is sacred, letting go becomes almost impossible.",
+        traits: ["Devoted", "Sincere", "Principled"],
+        love: "Words of affirmation",
+        image: "Eulogy_of_Light.webp",
+        vector: { W: 7, I: 6, P: 1, G: 4, R: 10, S: 7 }
+      },
+      "precious-moment": {
+        name: "Precious Moment",
+        archetype: "The Memory Keeper",
+        rarity: "67%",
+        tagline: "You don't want beautiful moments to disappear simply because they were brief.",
+        desc: "You pay attention. You remember tiny details other people forget—the expression someone made, a ridiculous comment, the exact feeling of an evening. You have a sentimental streak, but it isn't necessarily nostalgic; you simply understand how quickly the present becomes the past. Because of that, you make an effort to preserve things. You might take photographs, save little objects, revisit familiar places, or recreate a moment just because it mattered to you. You aren't afraid of time passing. You just want to make sure it doesn't erase what was important.",
+        traits: ["Attentive", "Sentimental", "Thoughtful"],
+        love: "Gift-giving",
+        image: "Precious_Moment.webp",
+        vector: { W: 8, I: 3, P: 3, G: 3, R: 6, S: 7 }
+      },
+      "offbeat-track": {
+        name: "Offbeat Track",
+        archetype: "The Unbothered Wanderer",
+        rarity: "55%",
+        tagline: "You don't need life to make sense to anyone but you.",
+        desc: "You're comfortable being a little strange. You don't always follow the expected route, and you have an almost infuriating ability to remain relaxed when everyone else is overthinking things. You're curious, easily entertained by unusual details, and happiest when you're allowed to wander without a strict destination. You can talk endlessly about something obscure that fascinates you—and then completely ignore the thing everyone else thinks is important. Beneath that casual exterior is someone deeply experienced, observant, and quietly attached to the people who make the journey worthwhile.",
+        traits: ["Unconventional", "Curious", "Easygoing"],
+        love: "Quality time",
+        image: "Offbeat_Track.webp",
+        vector: { W: 6, I: 4, P: 8, G: 3, R: 5, S: 4 }
+      },
+      "between-stars": {
+        name: "Between Stars",
+        archetype: "The Patient Believer",
+        rarity: "47%",
+        tagline: "You don't need to hold something in your hands to know it's real.",
+        desc: "You're capable of waiting without becoming bitter. Distance, uncertainty, delays, changing circumstances—you can tolerate all of these if you believe something is worth waiting for. You're also quietly ambitious and more passionate than your calm exterior suggests. You might be nervous before something important, but you'd rather admit it with a smile than let fear stop you. There's a beautiful contradiction in you: you're comfortable with the enormity of the universe, yet deeply aware of the individual people who make your little corner of it meaningful.",
+        traits: ["Patient", "Hopeful", "Wistful"],
+        love: "Words of affirmation",
+        image: "Xavier_Between_Stars_middle.png",
+        vector: { W: 7, I: 4, P: 2, G: 4, R: 7, S: 9 }
+      },
+      "coolsplash-soak": {
+        name: "Coolsplash Soak",
+        archetype: "The Mischief Maker",
+        rarity: "70%",
+        tagline: "You consider boredom a problem that should be solved immediately.",
+        desc: "You're playful, impulsive, and probably responsible for at least half of the stupid stories your friends tell about you. You like surprising people, dragging them into spontaneous adventures, and turning ordinary situations into something ridiculous. You have a wonderfully unserious side, but you're not careless about the people you care about. In fact, your playfulness is often how you make people feel safe enough to relax. You'd rather make someone laugh than give them a perfect speech.",
+        traits: ["Mischievous", "Playful", "Spontaneous"],
+        love: "Physical touch",
+        image: "Coolsplash_Soak.webp",
+        vector: { W: 6, I: 3, P: 9, G: 2, R: 3, S: 3 }
+      },
+      "nightvow-requiem": {
+        name: "Nightvow Requiem",
+        archetype: "The Survivor Queen",
+        rarity: "14%",
+        tagline: "You don't promise that everything will be okay. You promise that you won't leave.",
+        desc: "You have a profound understanding of what it means to survive something. You aren't the type to romanticize suffering, but neither are you frightened by it. When everything collapses, your instinct is to stay beside the people you care about and endure whatever comes next. You can be quiet, severe, even haunted, but you're remarkably dependable when circumstances become unbearable. You don't need happy endings to believe something is worth fighting for.",
+        traits: ["Resilient", "Devoted", "Stoic"],
+        love: "Acts of service",
+        image: "Nightvow_Requiem.webp",
+        vector: { W: 6, I: 9, P: 1, G: 7, R: 8, S: 6 }
+      },
+      "nightvow-mooncurse": {
+        name: "Nightvow Mooncurse",
+        archetype: "The Fallen King",
+        rarity: "2%",
+        tagline: "You learned to hold on because letting go once cost you too much.",
+        desc: "You are someone who has learned to carry more than you were ever meant to. You feel deeply, love fiercely, and hold on to the people you care about with everything you have. But somewhere along the way, your choices came with consequences you never expected, and now you find yourself living with the weight of them.There is a part of you that wonders if things would have been easier had you chosen differently, loved differently, or let go sooner..",
+        traits: ["Devoted", "Resilient", "Burdened"],
+        love: "Acts of Service",
+        image: "Nightvow_Mooncurse.webp",
+        vector: { W: 2, I: 10, P: 1, G: 9, R: 5, S: 4 }
+      },
+      "starfall-sanctuary": {
+        name: "Starfall Sanctuary",
+        archetype: "The Private Dreamer",
+        rarity: "43%",
+        tagline: "You don't need to escape the world—you just need one place where it can't reach you.",
+        desc: "You're dreamy, introspective, and quietly idealistic. You have a rich inner world and tend to find wonder in things other people overlook. You're not necessarily antisocial; you simply prefer intimacy without an audience. When life becomes overwhelming, your instinct isn't always to fight harder—it can be to create a small, peaceful corner where you can breathe again. You're capable of great romance, but your deeper need is sanctuary: somewhere you can put down your armour, be yourself, and let the rest of the universe become quiet for a while.",
+        traits: ["Dreamy", "Sheltering", "Introspective"],
+        love: "Quality time",
+        image: "Starfall_Sanctuary.webp",
+        vector: { W: 8, I: 4, P: 4, G: 3, R: 8, S: 6 }
+      },
+      "feverish-attempts": {
+        name: "Feverish Attempts",
+        archetype: "The Quietly Vulnerable One",
+        rarity: "38%",
+        tagline: "You don't always know how to ask for what you need, so you try to show it instead.",
+        desc: "You're capable and secretive, sometimes to a frustrating degree. You tend to believe that protecting people means keeping dangerous things away from them—even information. But underneath that independence is someone who genuinely wants to be understood and cared for. When confronted, you may stumble through an explanation, make awkward attempts at reassurance, or try to compensate through actions rather than words. You're not naturally good at asking for help. Learning to let someone into the difficult parts of your life is one of your biggest acts of trust.",
+        traits: ["Guarded", "Vulnerable", "Earnest"],
+        love: "Acts of service",
+        image: "Feverish_Attempts.webp",
+        vector: { W: 6, I: 7, P: 2, G: 5, R: 6, S: 4 }
+      },
+      "inflorescence-imprints": {
+        name: "Inflorescence Imprints",
+        archetype: "The Future-Focused Sentimentalist",
+        rarity: "59%",
+        tagline: "You treasure the past without letting it decide your future.",
+        desc: "You're sentimental, but you're not stuck in nostalgia. You enjoy preserving memories because they remind you of how far you've come, not because you want everything to remain unchanged. You're nurturing and quietly optimistic, particularly when it comes to things that take time to grow. You understand that people change, places disappear, and seasons end—but that doesn't necessarily make those things tragic. Sometimes change simply creates room for something new to bloom.",
+        traits: ["Nurturing", "Optimistic", "Sentimental"],
+        love: "Gift-giving",
+        image: "Inflorescence_Imprints.webp",
+        vector: { W: 8, I: 3, P: 3, G: 3, R: 7, S: 7 }
+      },
+      "deluded-fiction": {
+        name: "Deluded Fiction",
+        archetype: "The Hopeful Realist",
+        rarity: "52%",
+        tagline: "You know the world is ugly. You just refuse to let that be the whole story.",
+        desc: "You're optimistic, but not naïve. You notice the bad things. You understand when circumstances are unfair, dangerous, or downright absurd. What distinguishes you is that you actively search for the little piece of goodness that remains. You're also more pragmatic than people might expect: you can work within an imperfect system, keep your head down when necessary, and still quietly do what you believe is right. Your hope isn't blindness. It's resistance.",
+        traits: ["Hopeful", "Resourceful", "Resilient"],
+        love: "Gift-giving",
+        image: "Deluded_Fiction.webp",
+        vector: { W: 7, I: 4, P: 4, G: 4, R: 5, S: 6 }
+      },
+      "misty-silhouette": {
+        name: "Misty Silhouette",
+        archetype: "The Secretly Possessive One",
+        rarity: "27%",
+        tagline: "You look calm right up until someone touches the thing you secretly care about most.",
+        desc: "You're usually composed, observant, and difficult to read. But your calm isn't emotional emptiness—it is restraint. When something genuinely matters to you, the smallest trigger can reveal just how strong your feelings actually are. You're also more domestic and affectionate than people expect once you've decided someone is yours. You can sulk. You can tease. You can be unexpectedly needy. And you may pretend you're perfectly reasonable while being extremely obvious to anyone who knows you well.",
+        traits: ["Guarded", "Possessive", "Affectionate"],
+        love: "Physical touch",
+        image: "Misty_Silhouette.webp",
+        vector: { W: 4, I: 5, P: 2, G: 9, R: 5, S: 5 }
+      },
+      "silvery-polyphony": {
+        name: "Silvery Polyphony",
+        archetype: "The Harmonizer",
+        rarity: "49%",
+        tagline: "You don't want to win the conversation—you want to understand each other.",
+        desc: "You naturally look for balance. You listen before responding, notice when someone is uncomfortable, and tend to adjust yourself so everyone has room to speak. You're expressive without being domineering and cooperative without losing your own identity. You don't believe closeness means becoming identical. To you, the best relationships are made of two distinct people who learn how to move together without either one disappearing.",
+        traits: ["Attentive", "Harmonious", "Communicative"],
+        love: "Words of affirmation",
+        image: "Silvery_Polyphony.webp",
+        vector: { W: 7, I: 4, P: 4, G: 3, R: 6, S: 6 }
+      },
+      "outcasts-voyage": {
+        name: "Outcast's Voyage",
+        archetype: "The Reluctant Belonger",
+        rarity: "34%",
+        tagline: "You learned how to survive alone before you learned to let someone stay.",
+        desc: "You're independent almost by reflex. You don't like asking for help, you don't expect people to stay forever, and you can become very comfortable carrying your own problems. But underneath that independence is a powerful desire to belong somewhere. You don't necessarily need a crowd—you need one place, one person, one connection that feels genuine enough that you don't have to keep preparing to leave. When you finally find that, you become fiercely loyal to it.",
+        traits: ["Independent", "Guarded", "Loyal"],
+        love: "Acts of service",
+        image: "Xavier_Outcast's_Voyage_middle.webp",
+        vector: { W: 5, I: 5, P: 2, G: 8, R: 4, S: 6 }
+      },
+      "floof-attack": {
+        name: "Floof Attack",
+        archetype: "The Unfiltered Softie",
+        rarity: "74%",
+        tagline: "Give you enough time and you'll discover that your dignity was never that important.",
+        desc: "You're much sillier than you initially let people believe. You enjoy ridiculous situations, playful competition, teasing, and any excuse to abandon your usual composure. You're particularly affectionate when you're comfortable, and you don't mind looking foolish around people you trust. You have a mischievous streak, but it isn't cruel—you like making people laugh and being able to laugh at yourself.",
+        traits: ["Playful", "Affectionate", "Mischievous"],
+        love: "Physical touch",
+        image: "Floof_Attack.webp",
+        vector: { W: 8, I: 2, P: 10, G: 1, R: 3, S: 3 }
+      },
+      "celestial-message": {
+        name: "Celestial Message",
+        archetype: "The Hopeful Constant",
+        rarity: "63%",
+        tagline: "You believe some things are worth believing in before you have proof.",
+        desc: "You're patient, sentimental, and quietly hopeful. You don't need every feeling to be immediately confirmed before you allow yourself to care. You can hold onto a dream for a long time without becoming embarrassed by it. You're also deeply appreciative of milestones and memories, especially when they give ordinary life a sense of meaning. You don't necessarily need grand gestures—you just want to know that something you believe in is still there.",
+        traits: ["Hopeful", "Patient", "Sentimental"],
+        love: "Words of affirmation",
+        image: "Celestial_Message.jpg",
+        vector: { W: 7, I: 4, P: 2, G: 4, R: 8, S: 8 }
+      },
+      "floral-blessing": {
+        name: "Floral Blessing",
+        archetype: "The Quiet Giver",
+        rarity: "68%",
+        tagline: "You help first and explain yourself later.",
+        desc: "You have a naturally generous temperament. You notice when someone needs something and tend to solve the problem without making a production out of it. You're also adaptable—you can walk into an unfamiliar situation, play whatever role is required, and somehow make yourself useful. You enjoy quietly teaching and guiding people, but you aren't condescending about it. Your kindness is practical rather than performative.",
+        traits: ["Generous", "Adaptable", "Supportive"],
+        love: "Acts of service",
+        image: "Floral_Blessing.webp",
+        vector: { W: 8, I: 2, P: 3, G: 2, R: 5, S: 6 }
+      },
+      "no-restraint": {
+        name: "No Restraint",
+        archetype: "The Rule Breaker",
+        rarity: "31%",
+        tagline: "You can behave perfectly well. You simply don't always see the point.",
+        desc: "You're adaptable, clever, and surprisingly comfortable breaking convention when the situation calls for it. You can blend into a formal environment, play a role convincingly, and maintain composure—but underneath that competence is someone who enjoys pushing boundaries. You're not reckless for the sake of being reckless. You simply dislike unnecessary restrictions, especially when they interfere with what you want to accomplish. Once the rules become inconvenient, you're perfectly willing to improvise.",
+        traits: ["Bold", "Adaptable", "Unrestrained"],
+        love: "Physical touch",
+        image: "No_Restraint.webp",
+        vector: { W: 6, I: 10, P: 3, G: 1, R: 6, S: 3 }
+      },
+      "21-days": {
+        name: "21 Days",
+        archetype: "The Domestic Constant",
+        rarity: "57%",
+        tagline: "You discover that sometimes the most meaningful adventures are painfully ordinary.",
+        desc: "You're steady, practical, and surprisingly domestic once you're comfortable. You don't need dramatic proof that someone cares about you—you notice it in routines. Shared meals. Familiar jokes. Knowing where someone keeps their things. Waking up and knowing they'll still be there. You're patient enough to let intimacy develop naturally, and you have a talent for making temporary situations feel strangely like home.",
+        traits: ["Steady", "Domestic", "Patient"],
+        love: "Quality time",
+        image: "21_Days.webp",
+        vector: { W: 6, I: 3, P: 2, G: 4, R: 4, S: 10 }
+      },
+      "midnight-rainfall": {
+        name: "Midnight Rainfall",
+        archetype: "The Unmasked Self",
+        rarity: "23%",
+        tagline: "You want someone to love the person underneath the legend.",
+        desc: "You can be competent, mysterious, admired, even idealized—and still feel strangely unseen. You don't necessarily want more attention; you want different attention. You want someone who knows the tired, ordinary, imperfect version of you and chooses that person anyway. You're quieter about your vulnerabilities than most people realize, and you tend to reveal them only when you feel genuinely safe.",
+        traits: ["Vulnerable", "Guarded", "Sincere"],
+        love: "Quality time",
+        image: "Midnight_Rainfall.webp",
+        vector: { W: 6, I: 5, P: 2, G: 7, R: 6, S: 6 }
+      },
+      "midnight-whispers": {
+        name: "Midnight Whispers",
+        archetype: "The Jealous Romantic",
+        rarity: "36%",
+        tagline: "You can tolerate being admired. Being misunderstood is another matter.",
+        desc: "You're playful, teasing, and considerably more possessive than you like to admit. You don't necessarily want everyone to know how much you care, but you want the person who matters to know exactly where they stand with you. You're capable of pretending to be casual while quietly keeping track of everything. Your jealousy isn't necessarily loud—it can appear as a joke, a sulk, an oddly specific question, or a sudden desire for your attention to be returned.",
+        traits: ["Playful", "Possessive", "Devoted"],
+        love: "Words of affirmation",
+        image: "Midnight_Whispers.webp",
+        vector: { W: 5, I: 6, P: 6, G: 6, R: 5, S: 4 }
+      },
+      "faint-sensation": {
+        name: "Faint Sensation",
+        archetype: "The Subtle Communicator",
+        rarity: "41%",
+        tagline: "You say very little—and somehow expect the right person to notice everything.",
+        desc: "You're restrained, observant, and highly sensitive to small changes in atmosphere. You rarely announce your feelings dramatically. Instead, they appear in tiny shifts: where you sit, how long you look at someone, what you remember, the things you quietly do without being asked. You're difficult to read for people who expect directness, but incredibly transparent to someone who pays attention. You don't want to be interrogated into vulnerability. You want to be noticed.",
+        traits: ["Perceptive", "Restrained", "Subtle"],
+        love: "Physical touch",
+        image: "Faint_Sensation.webp",
+        vector: { W: 5, I: 4, P: 2, G: 8, R: 4, S: 6 }
+      },
+      "unique-aftertaste": {
+        name: "Unique Aftertaste",
+        archetype: "The Lingering Presence",
+        rarity: "45%",
+        tagline: "You don't need to be the loudest person in the room to be the one people remember.",
+        desc: "You're distinctive in ways that are difficult to explain. You might have unusual habits, strange humour, unexpected tastes, or simply a way of seeing things that makes people curious. You're adventurous enough to explore unfamiliar places, but you don't need constant stimulation. What matters is the experience itself—and the people you share it with. You leave impressions without trying very hard to make them.",
+        traits: ["Curious", "Distinctive", "Adventurous"],
+        love: "Quality time",
+        image: "Unique_Aftertaste.webp",
+        vector: { W: 6, I: 5, P: 4, G: 5, R: 5, S: 5 }
+      },
+      "romantic-afternoon": {
+        name: "Romantic Afternoon",
+        archetype: "The Slow-Living Soul",
+        rarity: "76%",
+        tagline: "You know how to make an ordinary afternoon feel like enough.",
+        desc: "You aren't interested in rushing through life just to prove you're productive. You appreciate comfort, small pleasures, familiar places, and people who make silence easy. You're observant enough to notice when someone is exhausted and caring enough to quietly adjust around them. Your affection tends to be gentle rather than overwhelming. You believe happiness can be found in very small things—and you're usually right.",
+        traits: ["Leisurely", "Attentive", "Gentle"],
+        love: "Quality time",
+        image: "Romantic_Afternoon.webp",
+        vector: { W: 8, I: 3, P: 4, G: 2, R: 6, S: 7 }
+      },
+      "tender-night": {
+        name: "Tender Night",
+        archetype: "The Guard-Down Heart",
+        rarity: "29%",
+        tagline: "You have a softer self that only appears when you feel completely safe.",
+        desc: "You're composed in public and much more vulnerable in private. You don't necessarily trust easily, but once you do, the difference is striking. You become affectionate, playful, attentive, and far more willing to admit what you want. You're not actually cold—you simply have a high threshold for emotional exposure. When that threshold finally breaks, you don't do things halfway.",
+        traits: ["Tender", "Private", "Intimate"],
+        love: "Physical touch",
+        image: "Tender_Night.webp",
+        vector: { W: 8, I: 5, P: 2, G: 5, R: 7, S: 6 }
+      },
+      "heartstring-symphony": {
+        name: "Heartstring Symphony",
+        archetype: "The Devoted Romantic",
+        rarity: "33%",
+        tagline: "Once something matters to you, your feelings have a habit of growing louder.",
+        desc: "You may begin quietly, but you don't stay there. Your attachments deepen through time and shared experiences until they become impossible to separate from your everyday life. You're emotionally expressive once you feel secure, and you aren't afraid of becoming invested. You nurture what you care about—sometimes patiently, sometimes anxiously, but always sincerely. You're the type to notice an empty chair, an unanswered message, or a plant that hasn't been watered because the person connected to it matters to you.",
+        traits: ["Devoted", "Expressive", "Sentimental"],
+        love: "Words of affirmation",
+        image: "Heartstring_Symphony.webp",
+        vector: { W: 7, I: 6, P: 3, G: 3, R: 8, S: 6 }
+      },
+      "fragment-of-time": {
+        name: "Fragment of Time",
+        archetype: "The Quiet Nostalgist",
+        rarity: "53%",
+        tagline: "You understand that ordinary time becomes precious precisely because it ends.",
+        desc: "You're reflective without being stuck in the past. You remember things because they mattered, not because you're incapable of moving forward. You notice how quickly life changes and therefore tend to appreciate moments while they're happening. You're the person who can suddenly bring up something from years ago and remember exactly what happened, where you were, and why it mattered. Your nostalgia isn't sadness. It's gratitude with a memory attached.",
+        traits: ["Nostalgic", "Reflective", "Grateful"],
+        love: "Quality time",
+        image: "Fragment_Of_Time.webp",
+        vector: { W: 7, I: 3, P: 2, G: 4, R: 5, S: 7 }
+      },
+      "precious-bonfire": {
+        name: "Precious Bonfire",
+        archetype: "The Reliable Warmth",
+        rarity: "66%",
+        tagline: "People relax around you because you make responsibility look effortless.",
+        desc: "You're dependable without being controlling. When something needs to be done, you simply do it. You may grumble about being given another responsibility, but you won't abandon it halfway through. You're also socially warmer than your calm exterior suggests—you enjoy shared experiences, group activities, and quietly making sure everyone is comfortable. You're the kind of person people gradually realize they've come to rely on.",
+        traits: ["Reliable", "Warm", "Responsible"],
+        love: "Acts of service",
+        image: "Precious_Bonfire.webp",
+        vector: { W: 9, I: 3, P: 3, G: 3, R: 5, S: 9 }
+      },
+      "fluffy-trap": {
+        name: "Fluffy Trap",
+        archetype: "The Sneaky Sweetheart",
+        rarity: "60%",
+        tagline: "You like making people wonder what you're up to—especially when the answer is something adorable.",
+        desc: "You're mischievous, playful, and considerably more calculated than you pretend to be. You enjoy harmless tricks, unexpected surprises, and catching people off guard. But the important part is why: you're not trying to hurt anyone. You like the intimacy of having your own little jokes and routines with someone. Your affection often arrives disguised as trouble.",
+        traits: ["Mischievous", "Playful", "Affectionate"],
+        love: "Physical touch",
+        image: "Xavier_Fluffy_Trap_middle.png",
+        vector: { W: 7, I: 3, P: 8, G: 4, R: 4, S: 4 }
+      },
+      "lightseeking-shadowrend": {
+        name: "Lightseeking Shadowrend",
+        archetype: "The Resolute Protector",
+        rarity: "10%",
+        tagline: "Once you've chosen someone, obstacles become problems to solve—not reasons to stop.",
+        desc: "You're decisive under pressure and unusually willing to shoulder difficult responsibilities yourself. You don't necessarily talk about what you're sacrificing; you simply move forward. You have a strong protective instinct and an almost frightening ability to stay focused when everyone else is losing their head. You're not driven by recklessness. You're driven by the belief that someone has to keep moving when the path becomes impossible.",
+        traits: ["Resolute", "Protective", "Self-sacrificing"],
+        love: "Acts of service",
+        image: "Lightseeking_Shadowrend.webp",
+        vector: { W: 6, I: 8, P: 2, G: 6, R: 4, S: 7 }
+      },
+      "lightseeking-obsession": {
+        name: "Lightseeking Obsession",
+        archetype: "The Single-Minded Devotee",
+        rarity: "1%",
+        tagline: "When you choose your purpose, the rest of the world becomes background noise.",
+        desc: "You possess an extraordinary capacity for focus. Once something becomes important to you, you can pursue it with almost frightening persistence. You don't easily abandon people, goals, or promises, even when doing so would be easier. That loyalty is your greatest strength—but it can also become your weakness. You can become so focused on one person or purpose that everything else begins to disappear from view. You don't merely commit. You fixate.",
+        traits: ["Obsessive", "Devoted", "Unwavering"],
+        love: "Acts of service",
+        image: "Lightseeking_Obsession.webp",
+        vector: { W: 6, I: 9, P: 2, G: 5, R: 7, S: 5 }
+      }
+    };
+
+    const QUESTIONS = [
+      {
+        text: "How do you prefer to spend your weekends?",
+        options: [
+          {
+            label: "Working on home projects, cooking, or crafting",
+            delta: { S: 2, W: 1 }
+          },
+          {
+            label: "Reading a good book or binging a show, no plans",
+            delta: { G: 2, P: -1 }
+          },
+          {
+            label: "Spending quality time with friends or family",
+            delta: { W: 2, P: 1 }
+          }
+        ]
+      },
+      {
+        text: "What makes you feel most appreciated?",
+        options: [
+          {
+            label: "When someone shares their feelings and verbally expresses appreciation",
+            delta: { R: 2 }
+          },
+          {
+            label: "When someone encourages your goals and supports your ambitions",
+            delta: { S: 1, W: 1 }
+          },
+          {
+            label: "When someone shows they care through thoughtful gestures or actions",
+            delta: { W: 2, R: -1 }
+          }
+        ]
+      },
+      {
+        text: "How do you typically express care for people close to you?",
+        options: [
+          {
+            label: "By planning special surprises or experiences for them",
+            delta: { P: 1, R: 1 }
+          },
+          {
+            label: "By giving compliments or encouraging words",
+            delta: { R: 2 }
+          },
+          {
+            label: "By spending quality time and just being present",
+            delta: { W: 1, S: 1 }
+          }
+        ]
+      },
+      {
+        text: "What's your preferred way to celebrate a special occasion?",
+        options: [
+          {
+            label: "Organizing a fun, eventful outing with friends or family",
+            delta: { P: 2, W: 1 }
+          },
+          {
+            label: "Keeping it low-key and intimate with a few loved ones",
+            delta: { G: 1, R: 1 }
+          },
+          {
+            label: "Planning a creative, memorable activity or experience",
+            delta: { R: 2, P: 1 }
+          }
+        ]
+      },
+      {
+        text: "How do you handle disagreements with others?",
+        options: [
+          {
+            label: "Facing the issue head-on and working together to solve it",
+            delta: { I: 1, W: 1 }
+          },
+          {
+            label: "Focusing on keeping the peace and finding middle ground",
+            delta: { S: 1, G: 1 }
+          },
+          {
+            label: "Taking a step back to let things settle before addressing it",
+            delta: { G: 2, S: 1 }
+          }
+        ]
+      },
+      {
+        text: "When you're feeling low, what kind of support do you appreciate most?",
+        options: [
+          {
+            label: "Thoughtful gestures or small gifts that show someone cares",
+            delta: { R: 1, W: 1 }
+          },
+          {
+            label: "Having someone there to cheer you up and spend time with",
+            delta: { W: 2, P: 1 }
+          },
+          {
+            label: "Giving space to relax and recharge on your own",
+            delta: { G: 2, S: 1 }
+          }
+        ]
+      },
+      {
+        text: "What type of work environment do you find most appealing?",
+        options: [
+          {
+            label: "A hands-on space where you can focus and get things done solo",
+            delta: { S: 1, G: 1 }
+          },
+          {
+            label: "A creative setting where new ideas can flow freely",
+            delta: { P: 2, R: 1 }
+          },
+          {
+            label: "A team-oriented environment where everyone works together",
+            delta: { W: 1, P: 1 }
+          }
+        ]
+      },
+      {
+        text: "What kind of vacation would you prefer?",
+        options: [
+          {
+            label: "An adventurous outdoor trip full of activities",
+            delta: { I: 2, P: 1 }
+          },
+          {
+            label: "A peaceful retreat for relaxation and rejuvenation",
+            delta: { S: 1, G: 1 }
+          },
+          {
+            label: "A trip to explore a new city and experience the culture",
+            delta: { P: 1, R: 1 }
+          }
+        ]
+      },
+      {
+        text: "What are your thoughts on surprises?",
+        options: [
+          {
+            label: "You enjoy exciting surprises that create memorable experiences",
+            delta: { P: 2, I: 1 }
+          },
+          {
+            label: "You prefer to know what's coming so you can prepare",
+            delta: { S: 1, G: 1 }
+          },
+          {
+            label: "You appreciate small surprises that show thoughtfulness",
+            delta: { R: 1, W: 1 }
+          }
+        ]
+      },
+      {
+        text: "When faced with a challenge, what do you rely on most?",
+        options: [
+          {
+            label: "Your practical skills to figure things out",
+            delta: { S: 2, R: -1 }
+          },
+          {
+            label: "Your creativity to find unique solutions",
+            delta: { P: 2, R: 1 }
+          },
+          {
+            label: "Your ability to analyze and plan the best approach",
+            delta: { S: 1, G: 1 }
+          }
+        ]
+      },
+      {
+        text: "How do you generally approach group projects?",
+        options: [
+          {
+            label: "Motivating everyone to share ideas and collaborate",
+            delta: { W: 1, P: 1 }
+          },
+          {
+            label: "Doing your part and trusting others to do theirs",
+            delta: { S: 1, G: 1 }
+          },
+          {
+            label: "Taking charge to lead the group toward the goal",
+            delta: { I: 2, G: -1 }
+          }
+        ]
+      },
+      {
+        text: "How would people describe their first impression of you?",
+        options: [
+          {
+            label: "Reserved — it takes a while for them to see the real you",
+            delta: { G: 2, W: -1 }
+          },
+          {
+            label: "Warm and easy to talk to right away",
+            delta: { G: -2, W: 2 }
+          },
+          {
+            label: "Intense — hard to ignore, for better or worse",
+            delta: { I: 2, G: 1 }
+          },
+          {
+            label: "Playful — you put people at ease almost immediately",
+            delta: { P: 2, G: -1 }
+          }
+        ]
+      },
+      {
+        text: "When something genuinely excites you, how does it show?",
+        options: [
+          {
+            label: "Full enthusiasm, no holding back",
+            delta: { I: 2, P: 1 }
+          },
+          {
+            label: "A quiet kind of satisfaction, mostly internal",
+            delta: { G: 2, I: -1 }
+          },
+          {
+            label: "You immediately want to tell someone about it",
+            delta: { W: 2, P: 1 }
+          },
+          {
+            label: "Calm, honestly — good news doesn't change your demeanor much",
+            delta: { S: 2, I: -1 }
+          }
+        ]
+      },
+      {
+        text: "How do you make big decisions?",
+        options: [
+          {
+            label: "Gut instinct — you decide fast and don't look back",
+            delta: { I: 1, S: -2 }
+          },
+          {
+            label: "You take your time and weigh every angle",
+            delta: { S: 2, G: 1 }
+          },
+          {
+            label: "You ask people you trust for input first",
+            delta: { W: 1, G: -1 }
+          },
+          {
+            label: "Whatever feels right in the moment",
+            delta: { P: 1, S: -1 }
+          }
+        ]
+      }
+    ];
+
+    /* ===== state ===== */
+
+    const DIMS = ["W", "I", "P", "G", "R", "S"];
+
+    let current = 0;
+    let cameFromPreview = false;
+    let userVector = { W: 5, I: 5, P: 5, G: 5, R: 5, S: 5 };
+
+    const $ = id => document.getElementById(id);
+
+    const screens = [
+      $("screen-intro"),
+      
+      $("screen-quiz"),
+      $("screen-result")
+    ];
+
+    /* ===== screen control ===== */
+
+    function showScreen(el) {
+      screens.forEach(s => s.classList.remove("active"));
+      el.classList.add("active");
+    }
+
+    
+
+    
+
+    /* ===== quiz rendering ===== */
+
+    function renderQuestion() {
+      const q = QUESTIONS[current];
+
+      $("q-number").textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+      $("progress-fill").style.width = `${(current / QUESTIONS.length) * 100}%`;
+      $("q-text").textContent = q.text;
+
+      $("q-options").innerHTML = "";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt.label;
+        btn.onclick = () => selectAnswer(opt.delta);
+        $("q-options").appendChild(btn);
+      });
+    }
+
+    function selectAnswer(delta) {
+      Object.keys(delta).forEach(dim => {
+        userVector[dim] += delta[dim];
+      });
+
+      current++;
+
+      if (current < QUESTIONS.length) {
+        renderQuestion();
+      } else {
+        $("progress-fill").style.width = "100%";
+        setTimeout(() => showResult(), 250);
+      }
+    }
+
+    /* ===== matching ===== */
+
+    function clamp(v) {
+      return Math.max(1, Math.min(10, v));
+    }
+
+    function findMatch() {
+      let best = null;
+      let bestDist = Infinity;
+
+      Object.keys(CARDS).forEach(key => {
+        const vec = CARDS[key].vector;
+        let dist = 0;
+
+        DIMS.forEach(dim => {
+          const diff = clamp(userVector[dim]) - vec[dim];
+          dist += diff * diff;
+        });
+
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = key;
+        }
+      });
+
+      return best;
+    }
+
+    /* ===== result rendering ===== */
+
+    function showResult(forcedKey) {
+      const key = forcedKey || findMatch();
+      const card = CARDS[key];
+
+      $("result-name").textContent = card.name;
+
+      $("result-archetype").innerHTML =
+  `<strong>${card.archetype}</strong><small>${card.tagline}</small>`;
+
+$("result-rarity").innerHTML =
+  `<span>${card.rarity}</span>also belong to this type`;
+
+      $("result-desc").textContent = card.desc;
+      $("result-love").textContent = `Love language: ${card.love}`;
+
+      const img = $("card-art");
+      img.src = card.image;
+      img.alt = `Xavier ${card.name} card art`;
+
+      $("result-traits").innerHTML = "";
+      card.traits.forEach(t => {
+        const pill = document.createElement("span");
+        pill.className = "trait-pill";
+        pill.textContent = t;
+        $("result-traits").appendChild(pill);
+      });
+
+     
+
+      showScreen($("screen-result"));
+    }
+
+    /* ===== reset ===== */
+
+    function resetQuiz() {
+      current = 0;
+      cameFromPreview = false;
+      userVector = { W: 5, I: 5, P: 5, G: 5, R: 5, S: 5 };
+      renderQuestion();
+      showScreen($("screen-quiz"));
+    }
+
+    /* ===== event listeners ===== */
+
+    $("start-btn").onclick = () => {
+      cameFromPreview = false;
+      renderQuestion();
+      showScreen($("screen-quiz"));
+    };
+
+    
+    
+    $("retry-btn").onclick = resetQuiz;
+
+    $("download-btn").onclick = () => {
+      html2canvas($("capture-area"), { backgroundColor: null, scale: 2 })
+        .then(canvas => {
+          const a = document.createElement("a");
+          a.download = "xavier-result.png";
+          a.href = canvas.toDataURL("image/png");
+          a.click();
+        });
+    };
+  </script>
+</body>
+</html>
