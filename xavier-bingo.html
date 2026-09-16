@@ -68,9 +68,12 @@
     text-shadow: 0 0 18px rgba(244,236,216,0.35);
   }
   .subtitle{
-    font-size: 1.05rem; color: var(--gold);
-    font-style: italic; letter-spacing: 0.02em; margin:0;
-  }
+  display:block;
+  font-size: 1.05rem; color: var(--gold);
+  font-style: italic; letter-spacing: 0.02em; margin:0;
+  text-decoration:none;
+}
+.subtitle:hover{ text-decoration: underline; }
 
   .panel{
     background: linear-gradient(180deg, var(--midnight-2), rgba(20,26,61,0.6));
@@ -97,10 +100,14 @@
   .call-info{ flex:1; font-family:'Inter',sans-serif; font-size:0.85rem; color:var(--silver); line-height:1.4; }
   .call-info b{ color:var(--moonlight); font-weight:600; }
 
-  .status-line{
-    text-align:center; font-family:'Inter',sans-serif; font-size:0.8rem;
-    color: rgba(217,220,236,0.65); margin-top:10px;
-  }
+  .status-row{
+  display:flex; align-items:center; justify-content:center;
+  gap:8px; margin-top:10px; flex-wrap:wrap;
+}
+.status-line{
+  text-align:center; font-family:'Inter',sans-serif; font-size:0.8rem;
+  color: rgba(217,220,236,0.65); margin:0;
+}
 
   /* grid */
   .grid{
@@ -176,16 +183,71 @@
   /* buttons */
   .btn-row{ display:flex; gap:10px; margin-top:16px; justify-content:center; flex-wrap:wrap; }
   button{
-    font-family:'Inter',sans-serif; font-weight:600; font-size:0.85rem;
-    letter-spacing:.02em;
-    padding: 11px 22px; border-radius:999px; border:1px solid var(--gold);
-    background: linear-gradient(180deg, rgba(201,168,118,0.18), rgba(201,168,118,0.05));
-    color: var(--moonlight); cursor:pointer;
-    transition: background .2s ease, transform .12s ease;
-  }
-  button:hover{ background: linear-gradient(180deg, rgba(201,168,118,0.32), rgba(201,168,118,0.1)); }
-  button:active{ transform: scale(0.97); }
-  button.ghost{ border-color: var(--indigo-glow); background:transparent; color:var(--silver); }
+  font-family:'Inter',sans-serif; font-weight:600; font-size:0.85rem;
+  letter-spacing:.02em;
+  padding: 12px 26px; border-radius:999px;
+  border: 1px solid rgba(20,26,61,0.5);
+  background: linear-gradient(180deg, #e0c088, var(--gold) 55%, #a3814f);
+  color: var(--midnight-2);
+  cursor:pointer;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.35) inset,
+    0 -3px 6px rgba(0,0,0,0.35) inset,
+    0 4px 10px rgba(0,0,0,0.45),
+    0 0 16px rgba(201,168,118,0.25);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  transition: background .2s ease, transform .12s ease, box-shadow .2s ease;
+}
+button:hover{
+  background: linear-gradient(180deg, #ecd09a, var(--gold) 55%, #b08e5a);
+}
+button:active{
+  transform: scale(0.97);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.2) inset,
+    0 -1px 3px rgba(0,0,0,0.3) inset,
+    0 2px 4px rgba(0,0,0,0.4);
+}
+  button.ghost{
+  background: linear-gradient(180deg, rgba(20,26,61,0.85), rgba(20,26,61,0.6));
+  color: var(--silver);
+  border: 1px solid var(--indigo-glow);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 -2px 5px rgba(0,0,0,0.35) inset,
+    0 3px 8px rgba(0,0,0,0.35);
+  text-shadow:none;
+}
+button.skip{
+  border-color: var(--gold);
+  background: linear-gradient(120deg, #a3814f 0%, var(--gold) 25%, #f4e2b8 50%, var(--gold) 75%, #a3814f 100%);
+  background-size: 220% 100%;
+  color: var(--midnight-2);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  animation: shimmer-sweep 3.2s linear infinite;
+}
+button.skip.skip-sm{
+  padding: 5px 14px;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+button.skip:hover{ animation-duration: 1.6s; }
+@keyframes shimmer-sweep{
+  0%{ background-position: 0% 0%; }
+  100%{ background-position: 220% 0%; }
+}
+button.ghost.shimmer-silver{
+  background: linear-gradient(120deg, var(--indigo-glow) 0%, var(--silver) 25%, #ffffff 50%, var(--silver) 75%, var(--indigo-glow) 100%);
+  background-size: 220% 100%;
+  color: var(--midnight-2);
+  border-color: var(--silver);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+  animation: shimmer-sweep 3.2s linear infinite;
+}
+button.ghost.shimmer-silver:hover{ animation-duration: 1.6s; }
+button.ghost:hover{
+  background: linear-gradient(180deg, rgba(51,64,126,0.7), rgba(20,26,61,0.6));
+}
   button:disabled{ opacity:.4; cursor:not-allowed; }
 
   /* modal */
@@ -295,7 +357,7 @@
       </g>
     </svg>
     <h1>The Xavier Bingo</h1>
-    <p class="subtitle">Designed & created by Ru(@starlitbride_)</p>
+    <a class="subtitle" href="https://twitter.com/starlitbride_" target="_blank" rel="noopener noreferrer">Designed & created by Ru(@starlitbride_)</a>
   </header>
 
   <div class="panel" id="callPanel">
@@ -306,8 +368,11 @@
       </div>
       <div class="call-info" id="callInfo">Press <b>Begin</b> to summon the first number under the moonlight.</div>
     </div>
-    <div class="status-line" id="statusLine">24 fates await. 0 revealed.</div>
-    <div class="nudge" id="nudgeMsg">That's not it — look again.</div>
+    <div class="status-row">
+  <div class="status-line" id="statusLine">24 fates await. 0 revealed.</div>
+  <button id="skipBtn" class="skip skip-sm">Skip</button>
+</div>
+<div class="nudge" id="nudgeMsg">That's not it — look again.</div>
   </div>
 
   <div class="panel" id="gridPanel">
@@ -316,7 +381,7 @@
 
   <div class="btn-row" id="controls">
     <button id="startBtn">Begin</button>
-    <button id="resetBtn" class="ghost">New Card</button>
+    <button id="resetBtn" class="ghost shimmer-silver">New Card</button>
   </div>
 
   <div class="cert-wrap" id="certWrap" style="display:none;"></div>
@@ -957,6 +1022,12 @@
 
   startBtn.addEventListener('click', startGame);
   resetBtn.addEventListener('click', resetToStart);
+  var skipBtn = document.getElementById('skipBtn');
+  skipBtn.addEventListener('click', function(){
+  if((state.phase !== 'playing' && state.phase !== 'keep-going') || state.awaitingIndex === null) return;
+  hideNudge();
+  callNext();
+});
   playAgainBtn.addEventListener('click', resetToStart);
   previewBingoBtn.addEventListener('click', function(){ showPreviewCertificate('BINGO'); });
   previewFullBtn.addEventListener('click', function(){ showPreviewCertificate('FULL HOUSE'); });
