@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Wall of Stars for Xavier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+    --navy-deep: #f4f1ee;
+    --navy-mid: #ffffff;
+    --moon-silver: #5b5468;
+    --lavender: #b9a6e0;
+    --blush: #eec3cf;
+    --gold: #cbb98e;
+    --note-cream: #f7ecd6;
+    --note-cream-border: #d8bd84;
+    --note-lav: #ddd0f2;
+    --note-lav-border: #b39ddb;
+    --note-blush: #f7d6df;
+    --note-blush-border: #e39aab;
+    --note-mint: #d8ead9;
+    --note-mint-border: #92c19c;
+    --note-sky: #d3e6f5;
+    --note-sky-border: #8fb8d9;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    background: linear-gradient(180deg, #dbd4ea 0%, #e2d7e4 22%, #eadade 42%, #f0dfd2 62%, #f4e6c9 82%, #f6e9be 100%);
+    background-attachment: fixed;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--moon-silver);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* soft bokeh / frost backdrop */
+  body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(3px 3px at 20% 30%, rgba(255,255,255,0.9), transparent),
+      radial-gradient(2px 2px at 60% 70%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(3px 3px at 80% 20%, rgba(255,255,255,0.85), transparent),
+      radial-gradient(2px 2px at 40% 85%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(3px 3px at 90% 60%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(2px 2px at 10% 65%, rgba(255,255,255,0.65), transparent),
+      radial-gradient(120px 120px at 15% 15%, rgba(185,166,224,0.12), transparent),
+      radial-gradient(160px 160px at 85% 80%, rgba(238,195,207,0.14), transparent);
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 56px 24px 24px;
+  }
+
+  header .eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: #a893d1;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    margin: 0 0 10px;
+    color: #4a4356;
+  }
+
+  header h1 em {
+    font-style: italic;
+    color: #c9a36a;
+  }
+
+  header p.sub {
+    max-width: 480px;
+    margin: 0 auto;
+    color: rgba(91,84,104,0.65);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  /* the wall */
+  #wall-scroll {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 60px;
+  }
+
+  #wall {
+    position: relative;
+    width: 1400px;
+    min-height: 900px;
+    margin: 0 auto;
+    transition: height 0.6s ease, width 0.6s ease;
+  }
+
+  /* Xavier hub in the center */
+  #hub {
+    position: absolute;
+    left: 50%;
+    top: 340px;
+    transform: translate(-50%, -50%);
+    width: 260px;
+    height: 260px;
+    z-index: 5;
+    text-align: center;
+  }
+
+  #hub .portrait {
+    width: 220px;
+    height: 220px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #ece3f5 70%);
+    border: 2px solid #cbb98e;
+    box-shadow: 0 0 0 8px rgba(203,185,142,0.12), 0 0 50px rgba(185,166,224,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Replace this SVG with an <img src="your-xavier-photo.jpg"> for the real artwork */
+  #hub .portrait svg { width: 62%; height: 62%; opacity: 0.85; }
+
+  #hub .hub-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    color: #c9a36a;
+  }
+
+  /* sticky notes */
+  .note {
+    position: absolute;
+    padding: 16px 18px;
+    border-radius: 3px;
+    box-shadow: 0 6px 16px rgba(150,130,170,0.22), 0 1px 0 rgba(255,255,255,0.6) inset;
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.4;
+    color: #4a4356;
+    cursor: default;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, z-index 0s;
+  }
+
+  .note:hover {
+    transform: scale(1.06) rotate(0deg) !important;
+    box-shadow: 0 10px 24px rgba(150,130,170,0.32);
+    z-index: 50 !important;
+  }
+
+  .note::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 46px;
+    height: 18px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .note .msg {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    word-break: break-word;
+  }
+
+  .note .from {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    text-align: right;
+    opacity: 0.75;
+  }
+
+  .note-cream  { background: var(--note-cream); border: 1px solid var(--note-cream-border); }
+  .note-lav    { background: var(--note-lav); border: 1px solid var(--note-lav-border); }
+  .note-blush  { background: var(--note-blush); border: 1px solid var(--note-blush-border); }
+  .note-mint   { background: var(--note-mint); border: 1px solid var(--note-mint-border); }
+  .note-sky    { background: var(--note-sky); border: 1px solid var(--note-sky-border); }
+    .note-icon {
+    position: absolute;
+    bottom: -10px;
+    left: -10px;
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(74,67,86,0.25));
+    pointer-events: none;
+    z-index: 2;
+  }
+  .size-small  { width: 150px; }
+  .size-medium { width: 200px; }
+  .size-large  { width: 260px; }
+
+  /* floating CTA */
+    #cta-row {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #cta {
+    position: relative;
+    background: linear-gradient(160deg, #e3d5f7 0%, #c3aee5 45%, #a78fd1 100%);
+    color: #453c5c;
+    border: 1px solid rgba(255,255,255,0.5);
+    padding: 15px 28px;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow:
+      0 10px 26px rgba(120,95,165,0.45),
+      0 2px 0 rgba(255,255,255,0.7) inset,
+      0 -6px 14px rgba(120,95,165,0.25) inset;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+  }
+
+  #cta::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 8%;
+    width: 84%;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0));
+    border-radius: 999px 999px 40% 40%;
+    pointer-events: none;
+  }
+
+  #cta:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 14px 30px rgba(120,95,165,0.55),
+      0 2px 0 rgba(255,255,255,0.7) inset,
+      0 -6px 14px rgba(120,95,165,0.25) inset;
+  }
+
+  #cta:active { transform: translateY(0); }
+
+  .cta-side {
+    background: linear-gradient(160deg, #fbf8f2 0%, #f0e9db 100%);
+    color: #6b6378;
+    text-decoration: none;
+    border: 1px solid rgba(203,185,142,0.4);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(150,130,170,0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .cta-side:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(150,130,170,0.3); }
+
+  #cta:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 12px 28px rgba(185,166,224,0.5); }
+
+  #cta:active { transform: translateX(-50%) translateY(0); }
+
+  /* modal */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(74,67,86,0.35);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+
+  #overlay.open { display: flex; }
+
+  #panel {
+    background: #fffdfa;
+    border: 1px solid rgba(185,166,224,0.3);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 420px;
+    padding: 30px 28px 26px;
+    box-shadow: 0 30px 70px rgba(91,84,104,0.25);
+  }
+
+  #panel h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+    color: #4a4356;
+  }
+
+  #panel p.hint {
+    margin: 0 0 20px;
+    font-size: 0.85rem;
+    color: rgba(91,84,104,0.55);
+  }
+
+  #panel label {
+    display: block;
+    font-size: 0.8rem;
+    color: #a893d1;
+    margin: 16px 0 6px;
+  }
+
+  #panel input[type="text"], #panel textarea {
+    width: 100%;
+    background: rgba(185,166,224,0.06);
+    border: 1px solid rgba(185,166,224,0.35);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #4a4356;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    resize: none;
+  }
+
+  #panel input[type="text"]:focus, #panel textarea:focus {
+    outline: none;
+    border-color: #c9a36a;
+  }
+
+  .char-count {
+    text-align: right;
+    font-size: 0.72rem;
+    color: rgba(91,84,104,0.4);
+    margin-top: 4px;
+  }
+
+  .option-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .opt-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(185,166,224,0.4);
+    background: transparent;
+    color: #4a4356;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .opt-btn.selected {
+    background: #b9a6e0;
+    color: #fff;
+    border-color: #b9a6e0;
+  }
+
+  .swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .swatch.selected { border-color: #c9a36a; }
+
+  #panel .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  #panel .actions button {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+  }
+
+  #cancelBtn { background: transparent; color: rgba(91,84,104,0.6); }
+  #submitBtn { background: #cbb98e; color: #3c331a; font-weight: 500; }
+  #submitBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .preview-wrap {
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+  }
+
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 30px 20px 50px;
+    font-size: 0.8rem;
+    color: rgba(91,84,104,0.4);
+  }
+    #star-field {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+    .falling-star {
+    position: absolute;
+    top: -10px;
+    border-radius: 50%;
+    background: #ffffff;
+    animation: fall-fade linear forwards, twinkle 1.1s ease-in-out infinite;
+  }
+
+  @keyframes fall-fade {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    10%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--drift), 110vh) scale(1); }
+  }
+
+  @keyframes twinkle {
+    0%, 100% { filter: brightness(1); }
+    50%      { filter: brightness(1.8); }
+  }
+</style>
+</head>
+<body>
+  <div id="star-field"></div>
+
+<header>
+  <div class="eyebrow">Designed & created <strong>Ru</strong> (<a href="https://x.com/starlitbride_" target="_blank" rel="noopener" style="color: inherit; font-weight: 600; text-decoration: underline;">@starlitbride_</a>)</div>
+  <h1>Wall of birthday wishes by Little Stars, <em>for Xavier</em></h1>
+  <p class="sub">Leave a message and watch it find its place among the others. The wall keeps growing — but every note stays.</p>
+</header>
+
+<div id="wall-scroll">
+  <div id="wall">
+    <div id="hub">
+      <div class="portrait">
+        <!-- Placeholder art. Swap this <svg> for <img src="xavier.jpg" style="width:100%;height:100%;object-fit:cover;"> -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c9a36a" stroke-width="1.4">
+          <circle cx="50" cy="36" r="14"/>
+          <path d="M20 20 L28 26 M80 20 L72 26" stroke-linecap="round"/>
+          <path d="M50 50 C 30 55, 22 75, 22 88 L78 88 C78 75, 70 55, 50 50 Z"/>
+          <path d="M50 10 L52 16 L58 16 L53 20 L55 26 L50 22 L45 26 L47 20 L42 16 L48 16 Z" fill="#c9a36a" stroke="none"/>
+        </svg>
+      </div>
+      <div class="hub-label">happy birthday to our star prince</div>
+    </div>
+    <!-- notes get injected here by JS -->
+  </div>
+</div>
+
+<div id="cta-row">
+  <a class="cta-side" href="https://starlightkisses.github.io/" target="_blank" rel="noopener">My Other Works</a>
+  <button id="cta">✦ Leave a birthday message for Xavier</button>
+  <a class="cta-side" href="#" target="_blank" rel="noopener">☕ Ko-Fi</a>
+</div>
+
+<div id="overlay">
+  <div id="panel">
+    <h2>Leave your message</h2>
+    <p class="hint">It'll be pinned somewhere on the wall ♡</p>
+
+    <label for="nameInput">Your name or nickname</label>
+    <input type="text" id="nameInput" maxlength="24" placeholder="e.g. a fellow traveler">
+
+    <label for="msgInput">Your message</label>
+    <textarea id="msgInput" rows="3" maxlength="180" placeholder="Say happy birthday..."></textarea>
+    <div class="char-count"><span id="charCount">0</span>/180</div>
+
+    <label>Size</label>
+    <div class="option-row" id="sizeOptions">
+      <button class="opt-btn" data-size="small">Small</button>
+      <button class="opt-btn selected" data-size="medium">Medium</button>
+      <button class="opt-btn" data-size="large">Large</button>
+    </div>
+
+    <label>Tilt</label>
+    <div class="option-row" id="angleOptions">
+      <button class="opt-btn" data-angle="-10">↖ tilt</button>
+      <button class="opt-btn" data-angle="-4">slight left</button>
+      <button class="opt-btn selected" data-angle="0">straight</button>
+      <button class="opt-btn" data-angle="4">slight right</button>
+      <button class="opt-btn" data-angle="10">tilt ↗</button>
+    </div>
+
+    <label>Color</label>
+    <div class="option-row" id="colorOptions">
+      <div class="swatch selected" data-color="note-cream" style="background:#f7ecd6; border-color:#d8bd84;"></div>
+      <div class="swatch" data-color="note-lav" style="background:#ddd0f2; border-color:#b39ddb;"></div>
+      <div class="swatch" data-color="note-blush" style="background:#f7d6df; border-color:#e39aab;"></div>
+      <div class="swatch" data-color="note-mint" style="background:#d8ead9; border-color:#92c19c;"></div>
+      <div class="swatch" data-color="note-sky" style="background:#d3e6f5; border-color:#8fb8d9;"></div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="note note-cream size-medium" id="previewNote" style="position:relative;transform:rotate(0deg);">
+        <div class="msg" id="previewMsg">Your message will look like this.</div>
+        <div class="from" id="previewName">— you</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="cancelBtn">Cancel</button>
+      <button id="submitBtn" disabled>Pin it to the wall</button>
+    </div>
+  </div>
+</div>
+
+<footer style="font-weight: 700;">made with love for Xavier's birthday</footer>
+
+<script>
+/* ============================================================
+   DATA LAYER — Google Sheets backend
+   Same pattern as the Bingo leaderboard: a Google Sheet holds
+   the data, an Apps Script "web app" sits in front of it, and
+   this page talks to that web app over fetch().
+
+   >>> PASTE YOUR DEPLOYED WEB APP URL BELOW <<<
+   ============================================================ */
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx07CKFfmwR3oiiRZiVEof0uyDDnY8GNC1lRQAsx3TsfaZb_-YF_ZksKnHT5KCmUtfV/exec';
+const NOTE_ICONS = [
+  'img1.png', 'img2.png', 'img3.png', 'img4.png', 'img5.png',
+  'bunbun.png', 'galaxy-kid.png', 'stella-blobbu.png',
+  'blobbu.png', 'blobbu1.png', 'blobbu2.png', 'kitty-xavier.png'
+];
+async function loadMessages() {
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Could not load messages from the sheet:', err);
+    return [];
+  }
+}
+
+async function saveMessage(note) {
+  try {
+    // text/plain avoids a CORS "preflight" request that Apps Script
+    // web apps don't handle well — the script still parses it as JSON.
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(note)
+    });
+  } catch (err) {
+    console.error('Could not save message to the sheet:', err);
+  }
+}
+
+/* ============================================================
+   WALL LAYOUT
+   Each note's x/y is decided once, the moment it's submitted,
+   and saved to the sheet along with everything else — so the
+   wall's layout stays put across visits instead of reshuffling
+   every time the page loads.
+   ============================================================ */
+
+const wall = document.getElementById('wall');
+const HUB_RADIUS = 170; // keep this clear zone around Xavier
+const NOTE_DIMS = { small: [150, 90], medium: [200, 110], large: [260, 140] };
+
+function wallSize(count) {
+  // grows in stages every 10 notes
+  const stage = Math.floor(count / 10);
+  return {
+    width: 1400 + stage * 300,
+    height: 900 + stage * 220
+  };
+}
+
+function pickPosition(size, wallW, wallH, existing) {
+  const [w, h] = NOTE_DIMS[size];
+  const hubX = wallW / 2;
+  const hubY = 340;
+  let best = null;
+
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const x = 40 + Math.random() * (wallW - w - 80);
+    const y = 40 + Math.random() * (wallH - h - 80);
+    const cx = x + w / 2, cy = y + h / 2;
+    const distFromHub = Math.hypot(cx - hubX, cy - hubY);
+    if (distFromHub < HUB_RADIUS) continue;
+
+    // count overlaps with existing notes (some overlap is fine/desired)
+    let overlaps = 0;
+    for (const n of existing) {
+      const dx = Math.abs(cx - n.cx), dy = Math.abs(cy - n.cy);
+      if (dx < (w + n.w) / 2 * 0.6 && dy < (h + n.h) / 2 * 0.6) overlaps++;
+    }
+    if (!best || overlaps < best.overlaps) {
+      best = { x, y, cx, cy, w, h, overlaps };
+    }
+    if (overlaps === 0) break;
+  }
+  return best || { x: 60, y: 60, cx: 60 + w / 2, cy: 60 + h / 2, w, h };
+}
+
+let cachedMessages = [];
+
+function drawWall(messages) {
+  const { width, height } = wallSize(messages.length);
+  wall.style.width = width + 'px';
+  wall.style.minHeight = height + 'px';
+
+  document.querySelectorAll('.note').forEach(n => n.remove());
+
+    messages.forEach(m => {
+    const el = document.createElement('div');
+    el.className = `note ${m.color} size-${m.size}`;
+    el.style.left = m.x + 'px';
+    el.style.top = m.y + 'px';
+    el.style.transform = `rotate(${m.angle}deg)`;
+    el.style.zIndex = 10 + Math.floor(Math.random() * 20);
+    el.innerHTML = `<div class="msg"></div><div class="from"></div>`;
+    el.querySelector('.msg').textContent = m.message;
+    el.querySelector('.from').textContent = `— ${m.name}`;
+
+    const icon = m.icon || NOTE_ICONS[0];
+    const img = document.createElement('img');
+    img.className = 'note-icon';
+    img.src = icon;
+    img.alt = '';
+    el.appendChild(img);
+
+    wall.appendChild(el);
+  });
+}
+
+async function refreshWall() {
+  cachedMessages = await loadMessages();
+  drawWall(cachedMessages);
+}
+
+/* ============================================================
+   MODAL / FORM
+   ============================================================ */
+
+const overlay = document.getElementById('overlay');
+const cta = document.getElementById('cta');
+const cancelBtn = document.getElementById('cancelBtn');
+const submitBtn = document.getElementById('submitBtn');
+const nameInput = document.getElementById('nameInput');
+const msgInput = document.getElementById('msgInput');
+const charCount = document.getElementById('charCount');
+const previewNote = document.getElementById('previewNote');
+const previewMsg = document.getElementById('previewMsg');
+const previewName = document.getElementById('previewName');
+
+let state = { size: 'medium', angle: 0, color: 'note-cream' };
+
+function openPanel() { overlay.classList.add('open'); }
+function closePanel() {
+  overlay.classList.remove('open');
+  nameInput.value = ''; msgInput.value = '';
+  charCount.textContent = '0';
+  updatePreview();
+  validate();
+}
+
+cta.addEventListener('click', openPanel);
+cancelBtn.addEventListener('click', closePanel);
+overlay.addEventListener('click', e => { if (e.target === overlay) closePanel(); });
+
+msgInput.addEventListener('input', () => {
+  charCount.textContent = msgInput.value.length;
+  updatePreview();
+  validate();
+});
+nameInput.addEventListener('input', () => { updatePreview(); validate(); });
+
+document.getElementById('sizeOptions').addEventListener('click', e => {
+  if (!e.target.dataset.size) return;
+  state.size = e.target.dataset.size;
+  document.querySelectorAll('#sizeOptions .opt-btn').forEach(b => b.classList.toggle('selected', b === e.target));
+  updatePreview();
+});
+
+document.getElementById('angleOptions').addEventListener('click', e => {
+  if (!e.target.dataset.angle) return;
+  state.angle = Number(e.target.dataset.angle);
+  document.querySelectorAll('#angleOptions .opt-btn').forEach(b => b.classList.toggle('selected', b === e.target));
+  updatePreview();
+});
+
+document.getElementById('colorOptions').addEventListener('click', e => {
+  if (!e.target.dataset.color) return;
+  state.color = e.target.dataset.color;
+  document.querySelectorAll('#colorOptions .swatch').forEach(s => s.classList.toggle('selected', s === e.target));
+  updatePreview();
+});
+
+function updatePreview() {
+  previewNote.className = `note ${state.color} size-${state.size}`;
+  previewNote.style.transform = `rotate(${state.angle}deg)`;
+  previewMsg.textContent = msgInput.value || 'Your message will look like this.';
+  previewName.textContent = `— ${nameInput.value || 'you'}`;
+}
+
+function validate() {
+  submitBtn.disabled = !(nameInput.value.trim() && msgInput.value.trim());
+}
+
+submitBtn.addEventListener('click', async () => {
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Pinning...';
+
+  const { width, height } = wallSize(cachedMessages.length + 1);
+  const placedSoFar = cachedMessages.map(m => {
+    const [w, h] = NOTE_DIMS[m.size];
+    return { cx: m.x + w / 2, cy: m.y + h / 2, w, h };
+  });
+  const pos = pickPosition(state.size, width, height, placedSoFar);
+
+  const note = {
+    name: nameInput.value.trim().slice(0, 24),
+    message: msgInput.value.trim().slice(0, 180),
+    size: state.size,
+    angle: state.angle,
+    color: state.color,
+    icon: NOTE_ICONS[Math.floor(Math.random() * NOTE_ICONS.length)],
+    x: Math.round(pos.x),
+    y: Math.round(pos.y),
+    ts: Date.now()
+  };
+
+  await saveMessage(note);
+  closePanel();
+  submitBtn.textContent = 'Pin it to the wall';
+  await refreshWall();
+});
+/* ============================================================
+   FALLING STARS
+   ============================================================ */
+
+const starField = document.getElementById('star-field');
+
+function spawnStar() {
+  const star = document.createElement('div');
+  star.className = 'falling-star';
+
+  const size = 3 + Math.random() * 5;            // 3–8px, bigger core
+  const left = Math.random() * 100;
+  const duration = 6 + Math.random() * 8;
+  const drift = (Math.random() - 0.5) * 120;
+  const glow = 20 + Math.random() * 20;           // bigger glow radius
+
+  const palette = ['#ffffff', '#fff3d0', '#e9d8ff']; // white, gold, lavender
+  const color = palette[Math.floor(Math.random() * palette.length)];
+
+  star.style.width = size + 'px';
+  star.style.height = size + 'px';
+  star.style.left = left + 'vw';
+  star.style.background = color;
+  star.style.boxShadow = `
+    0 0 ${glow}px ${glow / 2}px ${color},
+    0 0 ${glow * 2}px ${color}
+  `;
+  star.style.setProperty('--drift', drift + 'px');
+  star.style.animationDuration = `${duration}s, 1.1s`;
+  star.style.animationTimingFunction = 'linear, ease-in-out';
+  star.style.animationIterationCount = '1, infinite';
+
+  starField.appendChild(star);
+  star.addEventListener('animationend', (e) => {
+    if (e.animationName === 'fall-fade') star.remove();
+  });
+}
+
+function spawnStarCluster() {
+  const count = 3 + Math.floor(Math.random() * 4); // 3–6 stars per burst
+  for (let i = 0; i < count; i++) {
+    setTimeout(spawnStar, Math.random() * 800);
+  }
+}
+
+spawnStarCluster();
+setInterval(spawnStarCluster, 2200);
+
+/* init */
+refreshWall();
+</script>
+
+</body>
+</html>
