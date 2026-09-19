@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Xavier 2048</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void: #05060d;
+    --sky: #171f38;
+    --board: #0c1020;
+    --cell: #141b31;
+    --cell-2: #0d1224;
+    --ink: #eef1fb;
+    --ink-dim: #8b93b8;
+    --gold: #ffd27a;
+    --gold-soft: #e3ad57;
+    --danger: #ef8f92;
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(ellipse at 50% -10%, var(--sky) 0%, var(--void) 55%, #020308 100%);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  #particles{
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .particle{
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,210,122,0.95), rgba(255,210,122,0));
+    box-shadow: 0 0 7px 1px rgba(255,210,122,0.55);
+    animation: drift linear infinite;
+    opacity: 0;
+  }
+  .particle.pink{
+    background: radial-gradient(circle, rgba(255,175,205,0.95), rgba(255,175,205,0));
+    box-shadow: 0 0 7px 1px rgba(255,175,205,0.55);
+  }
+  .particle.violet{
+    background: radial-gradient(circle, rgba(190,170,255,0.95), rgba(190,170,255,0));
+    box-shadow: 0 0 7px 1px rgba(190,170,255,0.55);
+  }
+  .particle.white{
+    background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0));
+    box-shadow: 0 0 6px 1px rgba(255,255,255,0.5);
+  }
+  .particle.firefly{
+    animation: drift linear infinite, glow-flicker ease-in-out infinite;
+  }
+  @keyframes glow-flicker{
+    0%, 100%{ filter: brightness(0.85); }
+    50%{ filter: brightness(1.8); }
+  }
+  /* Hearts drift like the fireflies but reset the dot styling and carry
+     their own gently pulsing glyph inside */
+  .particle.heart{
+    width: auto; height: auto;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .particle.heart .heart-glyph{
+    display: inline-block;
+    line-height: 1;
+    text-shadow: 0 0 6px currentColor, 0 0 14px currentColor;
+    animation: heartbeat 1.3s ease-in-out infinite;
+  }
+  @keyframes heartbeat{
+    0%, 100%{ transform: scale(1); }
+    25%{ transform: scale(1.28); }
+    40%{ transform: scale(0.94); }
+    60%{ transform: scale(1.16); }
+  }
+  @keyframes drift{
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    10%  { opacity: 0.9; }
+    50%  { transform: translateY(-55vh) translateX(-10px) scale(1.3); }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-110vh) translateX(20px) scale(1); opacity: 0; }
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity: 0.35; }
+    50%{ opacity: 1; }
+  }
+
+  .wrap{
+    position: relative; z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+    min-height: 100vh;
+  }
+
+  header{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    gap: 12px;
+  }
+
+  .title-block h1{
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 2.5rem;
+    margin: 0;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+    text-shadow: 0 0 18px rgba(255,210,122,0.3);
+    position: relative;
+    display: inline-block;
+  }
+  .title-block h1::after{
+    content: '✧';
+    position: absolute;
+    top: -6px; right: -22px;
+    font-size: 1rem;
+    color: var(--gold);
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  .title-block p{
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    font-weight: 500;
+  }
+
+  .scores{
+    display: flex;
+    gap: 8px;
+  }
+  .scores{
+    display: flex;
+    background: linear-gradient(160deg, #141b31, #0a0e1c);
+    border: 1px solid rgba(255,210,122,0.18);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .score-box{
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 62px;
+    position: relative;
+  }
+  .score-box + .score-box::before{
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 1px; height: 60%;
+    background: rgba(255,210,122,0.18);
+  }
+  .score-box .label{
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    display: block;
+    margin-bottom: 1px;
+  }
+  .score-box .value{
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .toolbar-buttons{
+    display: flex;
+    gap: 8px;
+  }
+  .hint{
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+  .new-game{
+    background: linear-gradient(160deg, var(--gold), var(--gold-soft));
+    color: #2a1a05;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255,210,122,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .new-game:hover{ transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,210,122,0.45); }
+  .new-game:active{ transform: translateY(0); }
+  .new-game.ghost{
+    background: transparent;
+    color: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(255,210,122,0.4);
+  }
+  .new-game.ghost:hover{ box-shadow: inset 0 0 0 1px rgba(255,210,122,0.7), 0 4px 14px rgba(255,210,122,0.2); }
+
+  .board-frame{
+    position: relative;
+    background: linear-gradient(160deg, #1c2542 0%, var(--board) 100%);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow:
+      0 0 0 1px rgba(255,210,122,0.14),
+      0 20px 60px -20px rgba(0,0,0,0.8),
+      inset 0 0 40px rgba(120,150,255,0.05);
+  }
+  /* Two soft candlelit glows breathing behind the board, like flames
+     seen through frosted glass. */
+  .board-frame::before, .board-frame::after{
+    content: '';
+    position: absolute;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    filter: blur(38px);
+    pointer-events: none;
+    z-index: 0;
+    animation: candle-flicker 4.5s ease-in-out infinite;
+  }
+  .board-frame::before{
+    background: radial-gradient(circle, rgba(255,196,120,0.85), transparent 70%);
+    top: -40px; left: -40px;
+  }
+  .board-frame::after{
+    background: radial-gradient(circle, rgba(190,165,255,0.7), transparent 70%);
+    bottom: -40px; right: -40px;
+    animation-delay: 2.2s;
+  }
+  @keyframes candle-flicker{
+    0%, 100%{ opacity: 0.3; transform: scale(1); }
+    45%{ opacity: 0.55; transform: scale(1.1); }
+    60%{ opacity: 0.4; transform: scale(0.96); }
+  }
+
+  /* Corner ornaments on the board frame itself — stars at the top,
+     little candles at the bottom — never on the tiles. */
+  .board-corners{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .corner-orn{
+    position: absolute;
+    filter: drop-shadow(0 0 6px rgba(255,210,122,0.65));
+  }
+  .corner-orn.star{
+    width: 20px; height: 20px;
+    color: var(--gold);
+    animation: twinkle 2.6s ease-in-out infinite;
+  }
+  .corner-orn.candle{
+    width: 15px; height: 26px;
+  }
+  .corner-orn.candle .candle-flame{
+    animation: candle-flicker 2.1s ease-in-out infinite;
+    transform-origin: 50% 100%;
+  }
+  .corner-tl{ top: -9px; left: -9px; }
+  .corner-tr{ top: -9px; right: -9px; }
+  .corner-bl{ bottom: -9px; left: -6px; animation-delay: 1.1s; }
+  .corner-br{ bottom: -9px; right: -6px; animation-delay: 0.6s; }
+
+  .board{
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .cell-bg{
+    position: relative;
+    background: linear-gradient(160deg, var(--cell), var(--cell-2));
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(255,210,122,0.07);
+    overflow: hidden;
+  }
+  /* A little scatter of stars glimmering under each empty cell */
+  .cell-bg::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1.6px 1.6px at 22% 28%, rgba(255,255,255,0.55), transparent),
+      radial-gradient(1.2px 1.2px at 72% 62%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.6px 1.6px at 45% 82%, rgba(255,210,122,0.5), transparent),
+      radial-gradient(1.2px 1.2px at 85% 22%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1.4px 1.4px at 12% 68%, rgba(190,165,255,0.4), transparent);
+    animation: twinkle 5s ease-in-out infinite;
+  }
+  .cell-bg:nth-child(2n)::before{ animation-delay: 1.1s; }
+  .cell-bg:nth-child(3n)::before{ animation-delay: 2.3s; }
+  .cell-bg:nth-child(4n)::before{ animation-delay: 0.5s; }
+  .cell-bg:nth-child(5n)::before{ animation-delay: 3s; }
+
+  .tile-layer{
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .tile{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    transition: transform 0.15s ease-in-out, opacity 0.1s ease;
+    will-change: transform;
+  }
+
+  .tile-inner{
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(9,12,24,0.92) 55%);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 0 16px rgba(120,150,255,0.06);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .tile-img{
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Slow ambient sheen drifting across every tile, like moonlight on silk */
+  .tile-inner::before{
+    content: '';
+    position: absolute;
+    top: -60%; left: -70%;
+    width: 35%; height: 220%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: translateX(-160%) rotate(14deg);
+    animation: idle-shimmer 5s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+  @keyframes idle-shimmer{
+    0%{ transform: translateX(-160%) rotate(14deg); }
+    35%, 100%{ transform: translateX(260%) rotate(14deg); }
+  }
+
+  /* Bright burst sweep for tiles that just spawned or merged */
+  .tile-inner::after{
+    content: '';
+    position: absolute;
+    top: -60%; left: -70%;
+    width: 45%; height: 220%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.85), transparent);
+    transform: translateX(-160%) rotate(14deg);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .spawn .tile-inner::after, .merged .tile-inner::after{
+    animation: shimmer-burst 0.75s ease-out;
+  }
+  @keyframes shimmer-burst{
+    0%{ transform: translateX(-160%) rotate(14deg); opacity: 0; }
+    20%{ opacity: 1; }
+    100%{ transform: translateX(260%) rotate(14deg); opacity: 0; }
+  }
+
+  @keyframes pop{
+    0%{ transform: scale(0.5); opacity: 0.4; }
+    70%{ transform: scale(1.08); }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+  @keyframes merge-pop{
+    0%{ transform: scale(1); }
+    40%{ transform: scale(1.16); }
+    100%{ transform: scale(1); }
+  }
+  .spawn .tile-inner{ animation: pop 0.22s ease-out; }
+  .merged .tile-inner{ animation: merge-pop 0.18s ease-out; }
+
+  /* Tier styling — each merge climbs the stellar sequence: a faint red dwarf
+     warms through orange and sun-yellow, cools to white and blue-white, then
+     deepens into a blue giant and violet supergiant before collapsing into
+     a blazing gold-white nova at 2048. The fill stays a consistent dreamy
+     glass; only the glowing border and light change per tier. */
+  .v2  .tile-inner{ border-color: rgba(255,150,170,0.55); box-shadow: 0 0 12px rgba(255,150,170,0.3), inset 0 0 14px rgba(255,150,170,0.12); }
+  .v4  .tile-inner{ border-color: rgba(230,90,110,0.62); box-shadow: 0 0 14px rgba(230,90,110,0.38), inset 0 0 14px rgba(230,90,110,0.14); }
+  .v8  .tile-inner{ border-color: rgba(235,130,70,0.65); box-shadow: 0 0 16px rgba(235,130,70,0.42), inset 0 0 15px rgba(235,130,70,0.15); }
+  .v16 .tile-inner{ border-color: rgba(240,170,70,0.68); box-shadow: 0 0 18px rgba(240,170,70,0.46), inset 0 0 16px rgba(240,170,70,0.16); }
+  .v32 .tile-inner{ border-color: rgba(255,200,90,0.72); box-shadow: 0 0 20px rgba(255,200,90,0.5), inset 0 0 17px rgba(255,200,90,0.18); }
+  .v64 .tile-inner{ border-color: rgba(255,235,160,0.76); box-shadow: 0 0 22px rgba(255,235,160,0.55), inset 0 0 18px rgba(255,235,160,0.2); }
+  .v128 .tile-inner{ border-color: rgba(255,250,235,0.8); box-shadow: 0 0 24px rgba(255,250,235,0.6), inset 0 0 19px rgba(255,250,235,0.22); }
+  .v256 .tile-inner{ border-color: rgba(160,190,255,0.78); box-shadow: 0 0 26px rgba(160,190,255,0.62), inset 0 0 20px rgba(160,190,255,0.22); }
+  .v512 .tile-inner{ border-color: rgba(120,160,255,0.82); box-shadow: 0 0 30px rgba(120,160,255,0.68), inset 0 0 21px rgba(120,160,255,0.24); }
+  .v1024 .tile-inner{ border-color: rgba(170,140,255,0.86); box-shadow: 0 0 34px rgba(170,140,255,0.72), inset 0 0 22px rgba(170,140,255,0.26); }
+  .v2048 .tile-inner{ border-color: rgba(255,220,150,0.92); box-shadow: 0 0 44px rgba(255,220,150,0.88), inset 0 0 24px rgba(255,220,150,0.3); }
+  .v4096 .tile-inner, .v-hi .tile-inner{ border-color: rgba(255,255,255,0.95); box-shadow: 0 0 54px rgba(255,255,255,0.95), inset 0 0 26px rgba(255,255,255,0.32); }
+
+  .spawn .tile-inner, .merged .tile-inner{
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.5),
+      0 0 30px rgba(255,255,255,0.55),
+      inset 0 0 20px rgba(255,255,255,0.2);
+  }
+
+  .overlay{
+    position: absolute; inset: 0;
+    border-radius: 18px;
+    background: rgba(10,13,20,0.88);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+  }
+  .overlay.show{ display: flex; }
+  .overlay h2{
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 2rem;
+    margin: 0 0 6px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(227,197,137,0.4);
+  }
+  .overlay p{
+    margin: 0 0 18px;
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+  }
+  .overlay button{
+    background: linear-gradient(160deg, var(--gold), var(--gold-soft));
+    color: #2a1a05;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(227,197,137,0.35);
+  }
+
+  footer{
+    margin-top: 22px;
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  footer a{
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s ease, text-shadow 0.15s ease;
+  }
+  footer a:hover{
+    color: var(--gold-soft);
+    text-shadow: 0 0 10px rgba(255,210,122,0.5);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .particle{ animation: none; display:none; }
+    .tile{ transition: none; }
+    .spawn, .merged{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>Nocturne</h1>
+      <p>The 2048 game in Xavier version </p>
+    </div>
+    <div class="scores">
+      <div class="score-box">
+        <span class="label">Score</span>
+        <span class="value" id="score">0</span>
+      </div>
+      <div class="score-box">
+        <span class="label">Best</span>
+        <span class="value" id="best">0</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="hint">Swipe, or use the<br>arrow keys.</div>
+    <div class="toolbar-buttons">
+      <a class="new-game ghost" href="https://starlightkisses.github.io/" target="_blank" rel="noopener noreferrer">My other works</a>
+      <button class="new-game" id="newGame">New Game</button>
+    </div>
+  </div>
+
+  <div class="board-frame">
+    <div class="board-corners">
+      <svg class="corner-orn star corner-tl" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0 L14.3 9.7 L24 12 L14.3 14.3 L12 24 L9.7 14.3 L0 12 L9.7 9.7 Z"/>
+      </svg>
+      <svg class="corner-orn star corner-tr" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0 L14.3 9.7 L24 12 L14.3 14.3 L12 24 L9.7 14.3 L0 12 L9.7 9.7 Z"/>
+      </svg>
+      <svg class="corner-orn candle corner-bl" viewBox="0 0 18 30" aria-hidden="true">
+        <ellipse class="candle-flame" cx="9" cy="5" rx="3" ry="5" fill="#ffcf7a"/>
+        <ellipse cx="9" cy="6" rx="1.3" ry="2.6" fill="#fff3d2"/>
+        <rect x="6" y="11" width="6" height="18" rx="1.5" fill="#f4ecd8"/>
+        <rect x="6" y="11" width="6" height="2.5" rx="1" fill="#d9cca6"/>
+      </svg>
+      <svg class="corner-orn candle corner-br" viewBox="0 0 18 30" aria-hidden="true">
+        <ellipse class="candle-flame" cx="9" cy="5" rx="3" ry="5" fill="#ffcf7a"/>
+        <ellipse cx="9" cy="6" rx="1.3" ry="2.6" fill="#fff3d2"/>
+        <rect x="6" y="11" width="6" height="18" rx="1.5" fill="#f4ecd8"/>
+        <rect x="6" y="11" width="6" height="2.5" rx="1" fill="#d9cca6"/>
+      </svg>
+    </div>
+    <div class="board" id="board">
+      <!-- 16 static empty cells -->
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      <div class="tile-layer" id="tileLayer"></div>
+      <div class="overlay" id="overlay">
+        <h2 id="overlayTitle">Congratulations! you have reached Xavier</h2>
+        <p id="overlaySub">The candles still burn. Keep going, or begin again.</p>
+        <button id="overlayBtn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>Designed and created by Ru (<a href="https://twitter.com/starlitbride_" target="_blank" rel="noopener noreferrer">@starlitbride_</a>)</footer>
+
+</div>
+
+<script>
+(function(){
+  const SIZE = 4;
+  const boardEl = document.getElementById('board');
+  const tileLayer = document.getElementById('tileLayer');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlaySub = document.getElementById('overlaySub');
+  const overlayBtn = document.getElementById('overlayBtn');
+  const newGameBtn = document.getElementById('newGame');
+
+  let grid, score, best, won, moving, cellSize, gap, tileEls;
+  const TRANSITION_MS = 150;
+
+  function loadBest(){
+    try{
+      const b = localStorage.getItem('nocturne2048_best');
+      return b ? parseInt(b,10) : 0;
+    }catch(e){ return 0; }
+  }
+  function saveBest(v){
+    try{ localStorage.setItem('nocturne2048_best', String(v)); }catch(e){}
+  }
+
+  function emptyGrid(){
+    return Array.from({length: SIZE}, () => Array(SIZE).fill(null));
+  }
+
+  function init(){
+    grid = emptyGrid();
+    score = 0;
+    won = false;
+    moving = false;
+    best = loadBest();
+    tileLayer.innerHTML = '';
+    tileEls = new Map();
+    updateScores();
+    overlay.classList.remove('show');
+    addRandomTile();
+    addRandomTile();
+    measure();
+    renderFull();
+  }
+
+  function updateScores(){
+    scoreEl.textContent = score;
+    bestEl.textContent = best;
+  }
+
+  function addRandomTile(){
+    const empties = [];
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(!grid[r][c]) empties.push([r,c]);
+    if(empties.length === 0) return false;
+    const [r,c] = empties[Math.floor(Math.random()*empties.length)];
+    const value = Math.random() < 0.9 ? 2 : 4;
+    grid[r][c] = { value, id: cryptoId(), row: r, col: c, isNew: true, merged: false };
+    return true;
+  }
+
+  function cryptoId(){
+    return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  function tierClass(value){
+    if(value >= 4096) return 'v-hi';
+    return 'v' + value;
+  }
+
+  // The spawn highlight (pop animation + shimmer burst) should only glow
+  // briefly on arrival, then settle back into its normal tier glow.
+  function armSpawnRemoval(el){
+    setTimeout(() => { el.classList.remove('spawn'); }, 800);
+  }
+
+  // Tile art: each tier is one of Xavier's chibi poses, escalating from a
+  // tiny sleepy sketch up to the crowned "prince" at 2048 and the full
+  // heart-offering piece beyond. Filenames are plain relative paths — the
+  // images are expected to sit in the same folder as this HTML file.
+  const TILE_IMAGES = {
+    2: 'img6.gif',
+    4: 'img5.png',
+    8: 'img4.png',
+    16: 'img1.png',
+    32: 'img12.png',
+    64: 'kitty-xavier.png',
+    128: 'img14.png',
+    256: 'img9.png',
+    512: 'img13.png',
+    1024: 'img7.png',
+    2048: 'prince-xavier.png',
+  };
+  const TILE_IMAGE_HI = 'xavier-chibi-heart.png'; // 4096 and beyond
+
+  function tileImageSrc(value){
+    return TILE_IMAGES[value] || TILE_IMAGE_HI;
+  }
+
+  function measure(){
+    const rect = boardEl.getBoundingClientRect();
+    const gapPx = 10;
+    cellSize = (rect.width - gapPx*(SIZE-1)) / SIZE;
+    gap = gapPx;
+  }
+
+  function posFor(r, c){
+    return {
+      x: c * (cellSize + gap),
+      y: r * (cellSize + gap)
+    };
+  }
+
+  function makeTileEl(cell){
+    const el = document.createElement('div');
+    el.className = 'tile ' + tierClass(cell.value);
+    el.style.width = cellSize + 'px';
+    el.style.height = cellSize + 'px';
+    const {x,y} = posFor(cell.row, cell.col);
+    el.style.transform = `translate(${x}px, ${y}px)`;
+    const inner = document.createElement('div');
+    inner.className = 'tile-inner';
+    const img = document.createElement('img');
+    img.className = 'tile-img';
+    img.src = tileImageSrc(cell.value);
+    img.alt = String(cell.value);
+    img.draggable = false;
+    inner.appendChild(img);
+    el.appendChild(inner);
+    tileLayer.appendChild(el);
+    return el;
+  }
+
+  // Rebuilds every tile fresh, no animation. Used on init/new game/resize only.
+  function renderFull(){
+    tileLayer.innerHTML = '';
+    tileEls = new Map();
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        const cell = grid[r][c];
+        if(!cell) continue;
+        cell.row = r; cell.col = c;
+        const el = makeTileEl(cell);
+        if(cell.isNew){ el.classList.add('spawn'); armSpawnRemoval(el); cell.isNew = false; }
+        tileEls.set(cell.id, el);
+      }
+    }
+  }
+
+  function cloneGridValues(){
+    return grid.map(row => row.map(cell => cell ? cell.value : null));
+  }
+
+  function gridsEqual(a,b){
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(a[r][c] !== b[r][c]) return false;
+    return true;
+  }
+
+  // Compresses one line, keeping tile identity: the surviving (left/first) tile of a
+  // merge keeps its id and just doubles in value; the other tile becomes a "loser"
+  // that slides to the same destination and is removed once the slide finishes.
+  function compressLine(line){
+    const filtered = line.filter(x => x !== null);
+    const result = [];
+    const removed = []; // {loserId, destId}
+    let gained = 0;
+    let i = 0;
+    while(i < filtered.length){
+      if(i < filtered.length-1 && filtered[i].value === filtered[i+1].value){
+        filtered[i].value *= 2;
+        filtered[i].merged = true;
+        gained += filtered[i].value;
+        removed.push({ loserId: filtered[i+1].id, destId: filtered[i].id });
+        result.push(filtered[i]);
+        i += 2;
+      } else {
+        result.push(filtered[i]);
+        i += 1;
+      }
+    }
+    while(result.length < SIZE) result.push(null);
+    return { line: result, gained, removed };
+  }
+
+  function getLine(dir, index){
+    const line = [];
+    if(dir === 'left' || dir === 'right'){
+      for(let c=0;c<SIZE;c++) line.push(grid[index][c]);
+      if(dir === 'right') line.reverse();
+    } else {
+      for(let r=0;r<SIZE;r++) line.push(grid[r][index]);
+      if(dir === 'down') line.reverse();
+    }
+    return line;
+  }
+
+  function setLine(dir, index, newLine){
+    let nl = newLine;
+    if(dir === 'right' || dir === 'down') nl = newLine.slice().reverse();
+    if(dir === 'left' || dir === 'right'){
+      for(let c=0;c<SIZE;c++) grid[index][c] = nl[c];
+    } else {
+      for(let r=0;r<SIZE;r++) grid[r][index] = nl[r];
+    }
+  }
+
+  function move(dir){
+    if(moving) return;
+    const before = cloneGridValues();
+    let gainedTotal = 0;
+    let allRemoved = [];
+
+    for(let i=0;i<SIZE;i++){
+      const line = getLine(dir, i);
+      const { line: newLine, gained, removed } = compressLine(line);
+      gainedTotal += gained;
+      allRemoved = allRemoved.concat(removed);
+      setLine(dir, i, newLine);
+    }
+
+    const after = cloneGridValues();
+    if(gridsEqual(before, after)) return;
+
+    score += gainedTotal;
+    if(score > best){ best = score; saveBest(best); }
+    updateScores();
+
+    moving = true;
+
+    // Update row/col on surviving cells to match their new grid position
+    const destById = {};
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+      const cell = grid[r][c];
+      if(cell){ cell.row = r; cell.col = c; destById[cell.id] = { row:r, col:c }; }
+    }
+
+    // Phase 1: slide every surviving tile to its new position
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+      const cell = grid[r][c];
+      if(!cell) continue;
+      let el = tileEls.get(cell.id);
+      if(!el){ el = makeTileEl(cell); tileEls.set(cell.id, el); }
+      else{
+        const {x,y} = posFor(r,c);
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    }
+    // Slide loser tiles into the same destination as what they merged into
+    allRemoved.forEach(({loserId, destId}) => {
+      const el = tileEls.get(loserId);
+      const dest = destById[destId];
+      if(el && dest){
+        const {x,y} = posFor(dest.row, dest.col);
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    });
+
+    // Phase 2: once the slide finishes — drop losers, reveal merged values, spawn new tile
+    setTimeout(() => {
+      allRemoved.forEach(({loserId}) => {
+        const el = tileEls.get(loserId);
+        if(el){ el.remove(); tileEls.delete(loserId); }
+      });
+
+      for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+        const cell = grid[r][c];
+        if(!cell || !cell.merged) continue;
+        const el = tileEls.get(cell.id);
+        if(el){
+          el.className = 'tile ' + tierClass(cell.value);
+          const img = el.querySelector('.tile-inner img');
+          if(img){ img.src = tileImageSrc(cell.value); img.alt = String(cell.value); }
+          el.classList.add('merged');
+          el.addEventListener('animationend', function handler(){
+            el.classList.remove('merged');
+            el.removeEventListener('animationend', handler);
+          });
+        }
+        cell.merged = false;
+      }
+
+      addRandomTile();
+      for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+        const cell = grid[r][c];
+        if(cell && cell.isNew){
+          cell.row = r; cell.col = c;
+          const el = makeTileEl(cell);
+          el.classList.add('spawn');
+          armSpawnRemoval(el);
+          tileEls.set(cell.id, el);
+          cell.isNew = false;
+        }
+      }
+
+      moving = false;
+      checkGameState();
+    }, TRANSITION_MS);
+  }
+
+  function checkGameState(){
+    // win check
+    if(!won){
+      for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+        if(grid[r][c] && grid[r][c].value >= 2048){
+          won = true;
+          showOverlay(true);
+          return;
+        }
+      }
+    }
+    // lose check: no empty cells and no possible merges
+    const hasEmpty = grid.some(row => row.some(c => !c));
+    if(hasEmpty) return;
+
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        const v = grid[r][c].value;
+        if(c < SIZE-1 && grid[r][c+1] && grid[r][c+1].value === v) return;
+        if(r < SIZE-1 && grid[r+1][c] && grid[r+1][c].value === v) return;
+      }
+    }
+    showOverlay(false);
+  }
+
+  function showOverlay(isWin){
+    if(isWin){
+      overlayTitle.textContent = 'Congratulations! you have reached Xavier';
+      overlaySub.textContent = 'The sky is far from finished. Keep merging, or chart a new one.';
+      overlayBtn.textContent = 'Keep Playing';
+      overlay.classList.add('show');
+      overlayBtn.onclick = () => { overlay.classList.remove('show'); };
+    } else {
+      overlayTitle.textContent = 'No moves remain';
+      overlaySub.textContent = 'The sky has settled. Score: ' + score;
+      overlayBtn.textContent = 'Play Again';
+      overlay.classList.add('show');
+      overlayBtn.onclick = () => init();
+    }
+  }
+
+  // Input: keyboard
+  window.addEventListener('keydown', (e) => {
+    const map = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down' };
+    if(map[e.key]){
+      e.preventDefault();
+      move(map[e.key]);
+    }
+  });
+
+  // Input: touch swipe
+  let touchStartX = 0, touchStartY = 0;
+  boardEl.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches[0];
+    touchStartX = t.clientX; touchStartY = t.clientY;
+  }, { passive: true });
+
+  boardEl.addEventListener('touchend', (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const absX = Math.abs(dx), absY = Math.abs(dy);
+    const threshold = 24;
+    if(Math.max(absX, absY) < threshold) return;
+    if(absX > absY){
+      move(dx > 0 ? 'right' : 'left');
+    } else {
+      move(dy > 0 ? 'down' : 'up');
+    }
+  }, { passive: true });
+
+  newGameBtn.addEventListener('click', init);
+
+  window.addEventListener('resize', () => { measure(); renderFull(); });
+
+  // Ambient particles — a lot of fireflies and drifting hearts together
+  function spawnParticles(){
+    const container = document.getElementById('particles');
+    const count = 70;
+    const hues = ['', 'pink', 'violet', 'white'];
+    const heartColors = ['#ffb3c6', '#ffd27a', '#c9b3ff', '#ff8fa3', '#ffe3a3'];
+    const heartChance = 0.4;
+
+    for(let i=0;i<count;i++){
+      const left = Math.random()*100;
+      const delay = Math.random()*18;
+      const duration = 12 + Math.random()*14;
+      const flickerDuration = 1.1 + Math.random()*1.6;
+
+      if(Math.random() < heartChance){
+        const h = document.createElement('div');
+        h.className = 'particle heart';
+        h.style.left = left + 'vw';
+        h.style.bottom = '-10px';
+        h.style.animationDuration = duration + 's';
+        h.style.animationDelay = delay + 's';
+        const glyph = document.createElement('span');
+        glyph.className = 'heart-glyph';
+        glyph.textContent = '♥';
+        const size = 7 + Math.random()*11;
+        glyph.style.fontSize = size + 'px';
+        glyph.style.color = heartColors[Math.floor(Math.random()*heartColors.length)];
+        glyph.style.animationDuration = (1.1 + Math.random()*0.8) + 's';
+        glyph.style.animationDelay = (Math.random()*2) + 's';
+        h.appendChild(glyph);
+        container.appendChild(h);
+      } else {
+        const p = document.createElement('div');
+        const hue = hues[Math.floor(Math.random()*hues.length)];
+        p.className = 'particle firefly' + (hue ? ' ' + hue : '');
+        const size = 1.5 + Math.random()*2.8;
+        p.style.left = left + 'vw';
+        p.style.bottom = '-10px';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.animationDuration = duration + 's, ' + flickerDuration + 's';
+        p.style.animationDelay = delay + 's, ' + (Math.random()*2) + 's';
+        container.appendChild(p);
+      }
+    }
+  }
+
+  spawnParticles();
+  init();
+})();
+</script>
+</body>
+</html>
