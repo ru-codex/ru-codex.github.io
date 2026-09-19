@@ -279,14 +279,6 @@ html,body{ margin:0; min-height:100%; }
 }
 #profile-screen.active{ display:flex; }
 
-#profile-screen .moon{
-  position:fixed; top:6%; right:8%;
-  width:90px; height:90px; border-radius:50%;
-  background:radial-gradient(circle at 35% 35%, var(--moonlight), var(--lavender) 70%);
-  box-shadow:0 0 70px 18px rgba(251,247,255,.25);
-  z-index:0;
-}
-
 #profile-screen .star{ position:fixed; color:var(--lavender); opacity:.6; z-index:0; }
 #profile-screen .star svg{ width:100%; height:100%; display:block; }
 #profile-screen .s1{ top:10%; left:8%;  width:8px; }
@@ -360,49 +352,89 @@ html,body{ margin:0; min-height:100%; }
 #profile-screen .bio{
   font-size:15px;
   line-height:1.5;
-  color:var(--lavender);
-  margin:0;
+  color:rgb(255, 248, 249)
+ 
 }
 #profile-screen .paragraph{
   font-size:14px;
   line-height:1.6;
-  color:var(--lavender);
-  margin:10px 0 0;
-  opacity:.85;
+  color:rgb(255, 248, 249)
+  
 }
 
 #profile-screen .links{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
   border-top:1px solid var(--line);
   margin-top:20px;
+  padding:20px 18px 22px;
 }
 #profile-screen .link-item{
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-  padding:18px 8px;
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  padding:14px 6px 12px;
   text-decoration:none;
-  border-right:1px solid var(--line);
-  transition:background .2s ease;
+  border-radius:16px;
+  background:linear-gradient(160deg, rgba(246,241,251,.10), rgba(246,241,251,.02));
+  border:1px solid rgba(246,241,251,.14);
+  box-shadow:
+    5px 5px 12px rgba(8,4,18,.5),
+    -4px -4px 10px rgba(255,255,255,.05),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
 }
-#profile-screen .link-item:last-child{ border-right:none; }
-#profile-screen .link-item:hover{ background:rgba(246,241,251,.05); }
+#profile-screen .link-item:hover{
+  transform:translateY(-2px);
+  box-shadow:
+    7px 7px 16px rgba(8,4,18,.55),
+    -5px -5px 12px rgba(255,255,255,.06),
+    inset 0 1px 0 rgba(255,255,255,.1);
+}
+#profile-screen .link-item:active{
+  transform:translateY(1px);
+  box-shadow:
+    inset 4px 4px 10px rgba(8,4,18,.55),
+    inset -3px -3px 8px rgba(255,255,255,.04);
+}
+#profile-screen .link-item.disabled{
+  opacity:.45;
+  pointer-events:none;
+  cursor:default;
+}
 
 #profile-screen .link-icon{
-  width:34px; height:34px; border-radius:50%;
+  width:36px; height:36px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  background:rgba(246,241,251,.08);
+  background:radial-gradient(circle at 35% 30%, rgba(246,241,251,.18), rgba(246,241,251,.04));
   border:1px solid var(--line);
   font-size:15px;
   color:var(--moonlight);
+  box-shadow:
+    2px 2px 5px rgba(8,4,18,.45),
+    -2px -2px 5px rgba(255,255,255,.06);
 }
 
 #profile-screen .link-label{
   font-family:'Poppins', sans-serif;
-  font-size:11px;
-  letter-spacing:.3px;
+  font-size:10px;
+  letter-spacing:.2px;
   color:var(--p-cream);
   text-align:center;
   line-height:1.3;
+}
+
+#profile-screen .soon-tag{
+  font-family:'Poppins', sans-serif;
+  font-size:7.5px;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:var(--lilac);
+  opacity:.85;
+}
+
+@media (max-width:360px){
+  #profile-screen .links{ grid-template-columns:repeat(2, 1fr); }
 }
 
 #profile-screen .foot{
@@ -455,7 +487,6 @@ html,body{ margin:0; min-height:100%; }
   <!-- ===================== PROFILE SCREEN ===================== -->
   <div id="profile-screen">
 
-    <div class="moon"></div>
     <div class="star s1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
     <div class="star s2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
     <div class="star s3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"/></svg></div>
@@ -504,24 +535,50 @@ html,body{ margin:0; min-height:100%; }
         <div class="info">
           <p class="name">Ru</p>
           <p class="bio">Welcome to my page ✯ </p>
-          <p class="paragraph"> Here, you will find various of my work~~ head to Xavier quiz to find what Xavier card matches your personality; or to Xavier Gacha — to try your luck to see if you get a Xavier prompt, card orrr shhh! *secret*.
-             </p>
-            <p class="paragraph">Another of my works is OttoDaily-news, a Devvit automated app to post Love and Deepspace news in subreddit.</p>
+          <p class="paragraph">Here, you'll find various of my work~~ take the "What Xavier Card Are You?" quiz, try your luck at the Xavier gacha (Starrylight Pool), help poor Bunbun catch the falling kittyviers, or play the well-loved games in Xavier version: 2048, Memory game and Bingo.</p>
+            <p class="paragraph">To show your love and support for Xavier, head over to the DIY Birthday Cake and the Fan Wall~</p>
             <p class="paragraph">If you enjoyed what you found here, come say hi, follow along, or toss a little something my way on Ko-fi — every bit helps keep this girl's rent paid ✦</p>
         </div>
 
         <div class="links">
-          <a class="link-item" href="" target="_blank" rel="noopener">
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">🎂</div>
+            <div class="link-label">DIY Birthday Cake</div>
+            <div class="soon-tag">Coming soon</div>
+          </a>
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">✉</div>
+            <div class="link-label">Fan Wall for Birthday Messages</div>
+            <div class="soon-tag">Coming soon</div>
+          </a>
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">❖</div>
+            <div class="link-label">What Xavier Card Are You?</div>
+            <div class="soon-tag">Coming soon</div>
+          </a>
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">≈</div>
+            <div class="link-label">Xavier: Starrylight Pool</div>
+            <div class="soon-tag">Coming soon</div>
+          </a>
+          <a class="link-item disabled" href="#">
             <div class="link-icon">☾</div>
-            <div class="link-label">Xavier Bingo</div>
+            <div class="link-label">Xavier: Bingo</div>
+            <div class="soon-tag">Coming soon</div>
           </a>
-          <a class="link-item" href="https://starlightkisses.github.io/xavier-quiz.html">
-            <div class="link-icon">✧</div>
-            <div class="link-label">Xavier Quiz</div>
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">❣</div>
+            <div class="link-label">Help Bunbun: Catch Xavier</div>
+            <div class="soon-tag">Coming soon</div>
           </a>
-          <a class="link-item" href="https://starlightkisses.github.io/xavier-gacha.html">
-            <div class="link-icon">✦</div>
-            <div class="link-label">Xavier Gacha</div>
+          <a class="link-item" href="https://starlightkisses.github.io/xavier-2048.html" target="_blank" rel="noopener">
+            <div class="link-icon">▦</div>
+            <div class="link-label">2048: Xavier Version</div>
+          </a>
+          <a class="link-item disabled" href="#">
+            <div class="link-icon">❊</div>
+            <div class="link-label">Memory Game: Xavier Version</div>
+            <div class="soon-tag">Coming soon</div>
           </a>
         </div>
 
