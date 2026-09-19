@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Xavier Catcher</title>
+<style>
+  :root {
+    --bg-deep: #1a1030;
+    --bg-mid: #2d1b4e;
+    --star: #ffe9a8;
+    --accent-pink: #ff7eb6;
+    --accent-blue: #7ec8ff;
+    --panel: rgba(20, 12, 40, 0.72);
+    --text-light: #f4ecff;
+    --text-dim: #b8a8d8;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 0%, var(--bg-mid), var(--bg-deep) 70%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-light);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  /* starfield */
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--star);
+    opacity: 0.85;
+    box-shadow: 0 0 4px 1px rgba(255, 233, 168, 0.6);
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  .star.bright {
+    background: #ffffff;
+    box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.85);
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+
+  /* cosmic nebula glows, drifting slowly behind everything */
+  .nebula {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.35;
+    animation: drift 22s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -20px) scale(1.08); }
+  }
+
+  /* distant planets */
+  .planet {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+
+  /* shooting stars */
+  .shooting-star {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px #fff, 0 0 24px 6px rgba(255,255,255,0.85), 0 0 40px 10px rgba(158, 200, 255, 0.4);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .shooting-star::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    width: 150px;
+    height: 2.5px;
+    background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0));
+    transform: translateY(-50%);
+  }
+  @keyframes shoot {
+    0% { transform: rotate(var(--shoot-rot)) translate(0, 0); opacity: 0; }
+    8% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: rotate(var(--shoot-rot)) translate(var(--shoot-dist), 0); opacity: 0; }
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 18px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .hud-pill {
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.2px;
+  }
+
+  #scoreRow { display: flex; gap: 10px; }
+
+  .icon-wish { width: 20px; height: 20px; object-fit: contain; display: block; }
+  .count-blue { color: var(--accent-blue); }
+  .count-pink { color: var(--accent-pink); }
+
+  #timer {
+    font-variant-numeric: tabular-nums;
+    font-size: 17px;
+  }
+  #timer.low { color: #ff8a8a; }
+
+  /* Start screen */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(15,8,30,0.55), rgba(15,8,30,0.85));
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .overlay.hidden { display: none; }
+
+  .title {
+    font-size: clamp(28px, 8vw, 44px);
+    font-weight: 800;
+    margin: 0 0 6px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin: 0 0 24px;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  .basket-picker {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .basket-swatch {
+    width: 78px;
+    height: 92px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    position: relative;
+    border-radius: 14px;
+    padding: 6px 4px 4px;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .basket-swatch .thumb-basket {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .basket-swatch.selected {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.6);
+  }
+  .basket-swatch:active { transform: scale(0.95); }
+  .swatch-label {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    letter-spacing: 0.2px;
+  }
+  .basket-swatch.selected .swatch-label { color: var(--text-light); }
+
+  .byline {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+  }
+  .byline a {
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(184,168,216,0.5);
+  }
+  .byline a:hover { color: var(--text-light); }
+
+  .button-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .button-row-top,
+  .button-row-bottom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+    color: #1a1030;
+    border: none;
+    padding: 14px 42px;
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(255, 126, 182, 0.35);
+    transition: transform 0.12s ease;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.2;
+  }
+  .primary-btn:active { transform: scale(0.96); }
+
+  .ghost-btn {
+    margin-top: 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--text-light);
+    padding: 10px 28px;
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Results */
+  .results-row {
+    display: flex;
+    gap: 28px;
+    margin: 18px 0 30px;
+  }
+  .result-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .result-item .emoji { width: 46px; height: 46px; object-fit: contain; }
+  .result-item .num { font-size: 22px; font-weight: 700; }
+
+  .missed-note {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: -14px;
+    margin-bottom: 22px;
+  }
+
+  /* Basket unit: bunny riding atop a basket shape */
+  .basket-unit {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .basket-unit .bunny-img {
+    position: absolute;
+    left: 50%;
+    bottom: 44%;
+    transform: translateX(-50%);
+    width: 54%;
+    height: auto;
+    z-index: 3;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .basket-unit .basket-svg {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 68%;
+    z-index: 2;
+  }
+
+  #basket {
+    position: absolute;
+    width: 90px;
+    height: 128px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Falling items */
+  .item {
+    position: absolute;
+    font-size: 30px;
+    z-index: 8;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    line-height: 1;
+  }
+  .item img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+  }
+
+  .pop {
+    position: absolute;
+    z-index: 12;
+    font-weight: 800;
+    font-size: 20px;
+    pointer-events: none;
+    animation: popUp 0.6s ease-out forwards;
+  }
+  @keyframes popUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.9); }
+    100% { opacity: 0; transform: translateY(-40px) scale(1.1); }
+  }
+
+  .flash {
+    position: absolute;
+    inset: 0;
+    background: #ff3b3b;
+    opacity: 0;
+    z-index: 25;
+    pointer-events: none;
+  }
+  .flash.active { animation: flashHit 0.3s ease-out; }
+  @keyframes flashHit {
+    0% { opacity: 0.35; }
+    100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .star, .pop, .flash.active { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="starfield"></div>
+  <div class="flash" id="flash"></div>
+
+  <div id="hud" style="display:none;">
+    <div id="scoreRow">
+      <div class="hud-pill"><img class="icon-wish" src="special-3.png" alt="Deepspace Wish"><span id="scoreBlue" class="count-blue">0</span></div>
+      <div class="hud-pill"><img class="icon-wish" src="normal-1.png" alt="Empyrean Wish"><span id="scorePink" class="count-pink">0</span></div>
+    </div>
+    <div class="hud-pill" id="timer">01:30</div>
+  </div>
+
+  <!-- Start screen -->
+  <div class="overlay" id="startScreen">
+    <p class="byline">
+      <a href="https://twitter.com/starlitbride_" target="_blank" rel="noopener">Designed and created by Ru(@starlitbride_)</a>
+    </p>
+    <h1 class="title">Catch-a-Xavier</h1>
+    <p class="subtitle">Drag your basket and help Bunbun catch the falling Xavier. Dodge the bombs — one hit and it's over.</p>
+    <div class="basket-picker" id="basketPicker"></div>
+    <div class="button-row">
+      <div class="button-row-top">
+        <button class="primary-btn" id="startBtn">Start Game</button>
+      </div>
+      <div class="button-row-bottom">
+        <a class="primary-btn" id="otherWorksBtn" href="https://starlightkisses.github.io/" target="_blank" rel="noopener">My other works</a>
+        <a class="primary-btn" id="kofiBtn" href="#" target="_blank" rel="noopener">Ko-fi</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results screen -->
+  <div class="overlay hidden" id="resultsScreen">
+    <h1 class="title" style="font-size:clamp(24px,7vw,34px);">Time's Up!</h1>
+    <div class="results-row">
+      <div class="result-item">
+        <img class="emoji" src="special-3.png" alt="Deepspace Wish">
+        <span class="num count-blue" id="finalBlue">0</span>
+      </div>
+      <div class="result-item">
+        <img class="emoji" src="normal-1.png" alt="Empyrean Wish">
+        <span class="num count-pink" id="finalPink">0</span>
+      </div>
+    </div>
+    <p class="missed-note" id="endReason">Great run!</p>
+    <button class="primary-btn" id="againBtn">Play Again</button>
+  </div>
+
+  <div id="basket"></div>
+</div>
+
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const basket = document.getElementById('basket');
+  const hud = document.getElementById('hud');
+  const startScreen = document.getElementById('startScreen');
+  const resultsScreen = document.getElementById('resultsScreen');
+  const startBtn = document.getElementById('startBtn');
+  const againBtn = document.getElementById('againBtn');
+  const basketPicker = document.getElementById('basketPicker');
+  const scoreBlueEl = document.getElementById('scoreBlue');
+  const scorePinkEl = document.getElementById('scorePink');
+  const finalBlueEl = document.getElementById('finalBlue');
+  const finalPinkEl = document.getElementById('finalPink');
+  const timerEl = document.getElementById('timer');
+  const flashEl = document.getElementById('flash');
+  const endReasonEl = document.getElementById('endReason');
+  const starfield = document.getElementById('starfield');
+
+  const BUNNY_SRC = 'bunbun.png';
+
+  // Three distinct basket designs, each its own silhouette + palette.
+  const BASKET_SVGS = {
+    classic: `
+      <svg viewBox="0 0 100 75" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gradClassic" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8fd6ff"/>
+            <stop offset="100%" stop-color="#4a7fd6"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 18 Q50 30 90 18 L81 62 Q50 71 19 62 Z" fill="url(#gradClassic)" stroke="#2e5aa8" stroke-width="2.5"/>
+        <ellipse cx="50" cy="18" rx="40" ry="9" fill="none" stroke="#2e5aa8" stroke-width="2.5"/>
+        <line x1="21" y1="33" x2="79" y2="33" stroke="#2e5aa8" stroke-width="1.4" opacity="0.55"/>
+        <line x1="20" y1="46" x2="80" y2="46" stroke="#2e5aa8" stroke-width="1.4" opacity="0.55"/>
+        <line x1="19" y1="58" x2="81" y2="58" stroke="#2e5aa8" stroke-width="1.4" opacity="0.55"/>
+      </svg>`,
+    picnic: `
+      <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gradPicnic" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e3a15f"/>
+            <stop offset="100%" stop-color="#b9793c"/>
+          </linearGradient>
+        </defs>
+        <path d="M32 22 Q50 2 68 22" fill="none" stroke="#8a5a2e" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M14 24 Q50 14 86 24 L77 68 Q50 78 23 68 Z" fill="url(#gradPicnic)" stroke="#8a5a2e" stroke-width="2.5"/>
+        <path d="M20 30 L80 30 M22 40 L78 40 M23 50 L77 50 M24 60 L76 60" stroke="#8a5a2e" stroke-width="1.3" opacity="0.5"/>
+        <path d="M20 30 L28 68 M35 28 L40 70 M50 27 L50 71 M65 28 L60 70 M80 30 L72 68" stroke="#8a5a2e" stroke-width="1.3" opacity="0.5"/>
+        <path d="M30 24 L52 24 L41 44 Z" fill="#e0555f"/>
+        <path d="M30 24 L52 24 L41 44 Z" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.7"/>
+      </svg>`,
+    starlight: `
+      <svg viewBox="0 0 100 78" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gradStar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c79bff"/>
+            <stop offset="100%" stop-color="#8a5cf6"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 24 Q18 14 26 24 Q34 14 42 24 Q50 14 58 24 Q66 14 74 24 Q82 14 90 24 L82 64 Q50 74 18 64 Z" fill="url(#gradStar)" stroke="#6b3fa0" stroke-width="2.5"/>
+        <g fill="#fff2c2" opacity="0.9">
+          <path d="M30 38 l2.2 4.6 5 0.7-3.6 3.5 0.9 5-4.5-2.4-4.5 2.4 0.9-5-3.6-3.5 5-0.7z"/>
+          <path d="M68 44 l1.8 3.7 4 0.6-2.9 2.8 0.7 4-3.6-1.9-3.6 1.9 0.7-4-2.9-2.8 4-0.6z"/>
+          <path d="M50 54 l1.5 3.1 3.4 0.5-2.5 2.4 0.6 3.4-3-1.6-3 1.6 0.6-3.4-2.5-2.4 3.4-0.5z"/>
+        </g>
+      </svg>`,
+    nest: `
+      <svg viewBox="0 0 100 78" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gradNest" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c9925a"/>
+            <stop offset="100%" stop-color="#8a5a2e"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 30 Q10 20 20 22 Q18 12 30 16 Q32 8 42 14 Q50 6 58 14 Q68 8 70 16 Q82 12 80 22 Q90 20 88 30 Q94 46 82 60 Q50 72 18 60 Q6 46 12 30 Z" fill="url(#gradNest)" stroke="#6b431f" stroke-width="2.5"/>
+        <path d="M20 34 Q50 44 80 34 M18 46 Q50 57 82 46" stroke="#6b431f" stroke-width="1.3" opacity="0.5" fill="none"/>
+        <ellipse cx="38" cy="24" rx="7" ry="5" fill="#fef7e8" stroke="#e8d9b0" stroke-width="1"/>
+        <ellipse cx="50" cy="20" rx="7" ry="5" fill="#fde2e4" stroke="#e8b9c0" stroke-width="1"/>
+        <ellipse cx="62" cy="24" rx="7" ry="5" fill="#e8f0ff" stroke="#c7d8f0" stroke-width="1"/>
+      </svg>`,
+    ufo: `
+      <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="beamGrad" cx="50%" cy="0%" r="80%">
+            <stop offset="0%" stop-color="#9be8ff" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#9be8ff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="gradSaucer" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e6ecf5"/>
+            <stop offset="100%" stop-color="#9aa8c2"/>
+          </linearGradient>
+          <linearGradient id="gradDome" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#bdf3ff"/>
+            <stop offset="100%" stop-color="#6fc8e8"/>
+          </linearGradient>
+        </defs>
+        <path d="M20 46 Q50 68 80 46 L88 40 Q50 20 12 40 Z" fill="url(#beamGrad)"/>
+        <ellipse cx="50" cy="34" rx="42" ry="12" fill="url(#gradSaucer)" stroke="#5c6a86" stroke-width="2"/>
+        <path d="M32 30 Q50 8 68 30 Z" fill="url(#gradDome)" stroke="#4a8fae" stroke-width="1.5"/>
+        <circle cx="30" cy="34" r="2.4" fill="#ffd76b"/>
+        <circle cx="42" cy="36.5" r="2.4" fill="#ff8bd0"/>
+        <circle cx="58" cy="36.5" r="2.4" fill="#8bffb0"/>
+        <circle cx="70" cy="34" r="2.4" fill="#8bd0ff"/>
+      </svg>`
+  };
+
+  // Each basket SVG defines its own gradient ids (e.g. "gradStar"). SVG id
+  // references are resolved against the WHOLE document, not scoped to one
+  // <svg>. Since the same design's markup gets stamped out twice at once
+  // (once as a picker thumbnail, once as the live in-game basket), both
+  // copies end up sharing one id. If the copy that happens to hold the
+  // "real" definition gets hidden (e.g. the start screen overlay is set to
+  // display:none when the game starts), browsers stop rendering that
+  // gradient entirely — so the other copy referencing the same id renders
+  // with no fill at all (transparent). Suffixing every id with a unique
+  // tag per render keeps each instance fully self-contained.
+  function withUniqueSvgIds(svgMarkup, uid) {
+    return svgMarkup
+      .replace(/id="([\w-]+)"/g, (_, id) => `id="${id}-${uid}"`)
+      .replace(/url\(#([\w-]+)\)/g, (_, id) => `url(#${id}-${uid})`);
+  }
+
+  const BASKET_DESIGNS = [
+    { id: 'classic', name: 'Classic' },
+    { id: 'picnic', name: 'Picnic' },
+    { id: 'starlight', name: 'Starbasket' },
+    { id: 'nest', name: 'Nest' },
+    { id: 'ufo', name: 'UFO' },
+  ];
+  let selectedDesign = BASKET_DESIGNS[0].id;
+
+  const GOOD_ITEMS = [];
+  const NORMAL_WISH_COUNT = 11; // Empyrean Wish — 💫
+  const SPECIAL_WISH_COUNT = 3; // Deepspace Wish — ✨
+  for (let i = 1; i <= NORMAL_WISH_COUNT; i++) {
+    GOOD_ITEMS.push({ src: 'normal-' + i + (i === 6 ? '.gif' : '.png'), type: 'pink', special: false });
+  }
+  for (let i = 1; i <= SPECIAL_WISH_COUNT; i++) {
+    GOOD_ITEMS.push({ src: 'special-' + i + '.png', type: 'blue', special: true });
+  }
+  const NORMAL_ITEMS = GOOD_ITEMS.filter(i => !i.special);
+  const SPECIAL_ITEMS = GOOD_ITEMS.filter(i => i.special);
+  const SPECIAL_SPAWN_CHANCE = 0.18; // specials are rarer among the good drops
+
+  // Negative items are active from the very first spawn, and each one's
+  // frequency keeps ramping up as the player's score climbs.
+  const ROCK_THRESHOLD = 0;
+  const CLOUD_THRESHOLD = 0;
+  const BOMB_THRESHOLD = 0;
+
+  function rockChance(score) {
+    if (score < ROCK_THRESHOLD) return 0;
+    return Math.min(0.05 + (score - ROCK_THRESHOLD) * 0.0025, 0.20);
+  }
+  function cloudChance(score) {
+    if (score < CLOUD_THRESHOLD) return 0;
+    return Math.min(0.04 + (score - CLOUD_THRESHOLD) * 0.0025, 0.16);
+  }
+  function bombChance(score) {
+    if (score < BOMB_THRESHOLD) return 0;
+    const step = Math.floor((score - BOMB_THRESHOLD) / 10); // steps up every 10 score
+    return Math.min(0.015 + step * 0.015, 0.12);
+  }
+
+  const GAME_LENGTH = 90; // seconds
+  const BASKET_WIDTH = 90;
+  const BASKET_BOTTOM_MARGIN = 30; // px from bottom of screen to bottom of basket shape
+  const BASKET_SHAPE_HEIGHT = 62;  // catchable band height (the basket portion, not the bunny)
+
+  let running = false;
+  let basketX = 0;
+  let items = [];
+  let spawnTimer = 0;
+  let spawnInterval = 900;
+  let elapsed = 0;
+  let lastFrame = 0;
+  let rafId = null;
+  let scoreBlue = 0;
+  let scorePink = 0;
+  let score = 0; // internal running score — drives difficulty tiers; rocks/clouds pull it back down
+
+  function basketUnitMarkup() {
+    return `
+      <div class="basket-unit">
+        <img class="bunny-img" src="${BUNNY_SRC}" alt="Bunny carrying the basket">
+        <div class="basket-svg">${withUniqueSvgIds(BASKET_SVGS[selectedDesign], 'game-' + selectedDesign)}</div>
+      </div>`;
+  }
+
+  function renderBasket() {
+    basket.innerHTML = basketUnitMarkup();
+  }
+
+  function buildStarfield() {
+    starfield.innerHTML = '';
+    const w = window.innerWidth, h = window.innerHeight;
+
+    // nebula clouds
+    const nebulaColors = ['#5b3fa0', '#2d6fa0', '#a03f7a', '#3f5ba0'];
+    for (let i = 0; i < 4; i++) {
+      const n = document.createElement('div');
+      n.className = 'nebula';
+      const size = 180 + Math.random() * 160;
+      n.style.width = size + 'px';
+      n.style.height = size + 'px';
+      n.style.left = (Math.random() * w) + 'px';
+      n.style.top = (Math.random() * h * 0.7) + 'px';
+      n.style.background = nebulaColors[i % nebulaColors.length];
+      n.style.animationDelay = (Math.random() * 6) + 's';
+      n.style.animationDuration = (18 + Math.random() * 10) + 's';
+      starfield.appendChild(n);
+    }
+
+    // distant planets
+    const planetLooks = [
+      'radial-gradient(circle at 35% 30%, #ffd9a0, #b9793c 70%)',
+      'radial-gradient(circle at 35% 30%, #bfe4ff, #4a7fd6 70%)',
+      'radial-gradient(circle at 35% 30%, #e9c9ff, #8a5cf6 70%)',
+    ];
+    const planetCount = 2;
+    for (let i = 0; i < planetCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'planet';
+      const size = 24 + Math.random() * 30;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = (Math.random() * w) + 'px';
+      p.style.top = (Math.random() * h * 0.55) + 'px';
+      p.style.background = planetLooks[Math.floor(Math.random() * planetLooks.length)];
+      p.style.boxShadow = '0 0 18px rgba(255,255,255,0.15)';
+      starfield.appendChild(p);
+    }
+
+    // twinkling stars
+    for (let i = 0; i < 260; i++) {
+      const s = document.createElement('div');
+      s.className = 'star' + (Math.random() < 0.22 ? ' bright' : '');
+      const size = Math.random() * 2.6 + 0.9;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = Math.random() * w + 'px';
+      s.style.top = Math.random() * h + 'px';
+      s.style.animationDelay = (Math.random() * 3) + 's';
+      s.style.animationDuration = (2 + Math.random() * 3) + 's';
+      starfield.appendChild(s);
+    }
+  }
+
+  function spawnShootingStar() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    const startX = Math.random() * w * 0.7;
+    const startY = Math.random() * h * 0.4;
+    const angle = 25 + Math.random() * 20; // degrees, downward-right
+    const distance = 260 + Math.random() * 220;
+    star.style.left = startX + 'px';
+    star.style.top = startY + 'px';
+    star.style.setProperty('--shoot-rot', angle + 'deg');
+    star.style.setProperty('--shoot-dist', distance + 'px');
+    star.style.animation = 'shoot ' + (0.9 + Math.random() * 0.5) + 's ease-in forwards';
+    starfield.appendChild(star);
+    setTimeout(() => star.remove(), 1600);
+  }
+
+  function scheduleShootingStars() {
+    const delay = 1200 + Math.random() * 2600; // random gap between 1.2–3.8s
+    setTimeout(() => {
+      spawnShootingStar();
+      scheduleShootingStars();
+    }, delay);
+  }
+
+  function buildBasketPicker() {
+    basketPicker.innerHTML = '';
+    BASKET_DESIGNS.forEach((d, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'basket-swatch' + (i === 0 ? ' selected' : '');
+      btn.innerHTML = `
+        <div class="thumb-basket">
+          <div class="basket-unit">
+            <img class="bunny-img" src="${BUNNY_SRC}" alt="${d.name} basket">
+            <div class="basket-svg">${withUniqueSvgIds(BASKET_SVGS[d.id], 'picker-' + d.id)}</div>
+          </div>
+        </div>
+        <span class="swatch-label">${d.name}</span>`;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.basket-swatch').forEach(el => el.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedDesign = d.id;
+        renderBasket();
+      });
+      basketPicker.appendChild(btn);
+    });
+  }
+
+  function resetBasketPosition() {
+    basketX = window.innerWidth / 2 - BASKET_WIDTH / 2;
+    updateBasketVisual();
+  }
+
+  function updateBasketVisual() {
+    basket.style.left = basketX + 'px';
+    basket.style.bottom = BASKET_BOTTOM_MARGIN + 'px';
+  }
+
+  function clampBasketX(x) {
+    const min = 0;
+    const max = window.innerWidth - BASKET_WIDTH;
+    return Math.max(min, Math.min(max, x));
+  }
+
+  // Drag handling (mouse + touch), no keyboard
+  let dragging = false;
+  function pointerDown(e) {
+    if (!running) return;
+    dragging = true;
+    movePointer(e);
+  }
+  function pointerMove(e) {
+    if (!dragging || !running) return;
+    movePointer(e);
+  }
+  function pointerUp() { dragging = false; }
+
+  function movePointer(e) {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    basketX = clampBasketX(clientX - BASKET_WIDTH / 2);
+    updateBasketVisual();
+  }
+
+  stage.addEventListener('mousedown', pointerDown);
+  window.addEventListener('mousemove', pointerMove);
+  window.addEventListener('mouseup', pointerUp);
+  stage.addEventListener('touchstart', pointerDown, { passive: true });
+  stage.addEventListener('touchmove', pointerMove, { passive: true });
+  window.addEventListener('touchend', pointerUp);
+
+  function spawnItem() {
+    const rC = rockChance(score);
+    const cC = cloudChance(score);
+    const bC = bombChance(score);
+    const roll = Math.random();
+
+    const el = document.createElement('div');
+    el.className = 'item';
+    let data;
+    if (roll < bC) {
+      data = { kind: 'bomb', bad: true, emoji: '💣' };
+    } else if (roll < bC + cC) {
+      data = { kind: 'cloud', bad: true, emoji: '⛈️', penalty: 3 };
+    } else if (roll < bC + cC + rC) {
+      data = { kind: 'rock', bad: true, emoji: '🪨', penalty: 1 };
+    } else {
+      const pool = Math.random() < SPECIAL_SPAWN_CHANCE ? SPECIAL_ITEMS : NORMAL_ITEMS;
+      const good = pool[Math.floor(Math.random() * pool.length)];
+      data = { kind: 'wish', bad: false, ...good };
+    }
+    if (data.kind === 'wish') {
+      el.innerHTML = '<img src="' + data.src + '" alt="wish" draggable="false">';
+    } else {
+      el.textContent = data.emoji;
+    }
+    const x = Math.random() * (window.innerWidth - 46);
+    el.style.left = x + 'px';
+    el.style.top = '-40px';
+    stage.appendChild(el);
+
+    const speed = 2.2 + Math.random() * 1.6 + Math.min(elapsed / 20000, 2.5);
+    items.push({ el, x, y: -40, speed, data, caught: false });
+  }
+
+  function showPop(x, y, text, color) {
+    const pop = document.createElement('div');
+    pop.className = 'pop';
+    pop.textContent = text;
+    pop.style.left = x + 'px';
+    pop.style.top = y + 'px';
+    pop.style.color = color;
+    stage.appendChild(pop);
+    setTimeout(() => pop.remove(), 650);
+  }
+
+  function checkCatch(item) {
+    const catchTop = window.innerHeight - BASKET_BOTTOM_MARGIN - BASKET_SHAPE_HEIGHT;
+    const catchBottom = window.innerHeight - BASKET_BOTTOM_MARGIN;
+    const basketLeft = basketX;
+    const basketRight = basketX + BASKET_WIDTH;
+    const itemBottom = item.y + 40;
+    const itemCenterX = item.x + 23;
+
+    if (itemBottom >= catchTop && itemBottom <= catchBottom) {
+      if (itemCenterX >= basketLeft && itemCenterX <= basketRight) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function endGame(reason) {
+    running = false;
+    cancelAnimationFrame(rafId);
+    finalBlueEl.textContent = scoreBlue;
+    finalPinkEl.textContent = scorePink;
+    endReasonEl.textContent = reason;
+    resultsScreen.classList.remove('hidden');
+    hud.style.display = 'none';
+    items.forEach(it => it.el.remove());
+    items = [];
+  }
+
+  function tick(ts) {
+    if (!running) return;
+    if (!lastFrame) lastFrame = ts;
+    const dt = ts - lastFrame;
+    lastFrame = ts;
+    elapsed += dt;
+
+    const remaining = Math.max(0, GAME_LENGTH * 1000 - elapsed);
+    const secs = Math.ceil(remaining / 1000);
+    const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+    const ss = String(secs % 60).padStart(2, '0');
+    timerEl.textContent = mm + ':' + ss;
+    timerEl.classList.toggle('low', secs <= 10);
+
+    if (remaining <= 0) {
+      endGame('Great run!');
+      return;
+    }
+
+    spawnTimer += dt;
+    const currentInterval = Math.max(380, spawnInterval - elapsed / 60);
+    if (spawnTimer > currentInterval) {
+      spawnTimer = 0;
+      spawnItem();
+    }
+
+    for (let i = items.length - 1; i >= 0; i--) {
+      const item = items[i];
+      item.y += item.speed * (dt / 16.6);
+      item.el.style.top = item.y + 'px';
+
+      if (!item.caught && checkCatch(item)) {
+        item.caught = true;
+
+        if (item.data.kind === 'bomb') {
+          flashEl.classList.remove('active');
+          void flashEl.offsetWidth;
+          flashEl.classList.add('active');
+          item.el.remove();
+          items.splice(i, 1);
+          endGame('A bomb got you!');
+          return;
+        } else if (item.data.kind === 'rock' || item.data.kind === 'cloud') {
+          score = Math.max(0, score - item.data.penalty);
+          showPop(item.x, item.y - 10, '-' + item.data.penalty, item.data.kind === 'cloud' ? '#ff6b6b' : '#ffb37a');
+          item.el.remove();
+          items.splice(i, 1);
+          continue;
+        } else {
+          score++;
+          if (item.data.type === 'blue') { scoreBlue++; scoreBlueEl.textContent = scoreBlue; }
+          else { scorePink++; scorePinkEl.textContent = scorePink; }
+          showPop(item.x, item.y - 10, '+1', item.data.type === 'blue' ? '#7ec8ff' : '#ff7eb6');
+          item.el.remove();
+          items.splice(i, 1);
+          continue;
+        }
+      }
+
+      if (item.y > window.innerHeight + 40) {
+        item.el.remove();
+        items.splice(i, 1);
+      }
+    }
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function startGame() {
+    scoreBlue = 0; scorePink = 0; score = 0;
+    scoreBlueEl.textContent = '0';
+    scorePinkEl.textContent = '0';
+    elapsed = 0;
+    lastFrame = 0;
+    spawnTimer = 0;
+    items.forEach(it => it.el.remove());
+    items = [];
+    resetBasketPosition();
+    renderBasket();
+    startScreen.classList.add('hidden');
+    resultsScreen.classList.add('hidden');
+    hud.style.display = 'flex';
+    running = true;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  startBtn.addEventListener('click', startGame);
+  againBtn.addEventListener('click', () => {
+    resultsScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+  });
+
+  window.addEventListener('resize', () => {
+    buildStarfield();
+    if (!running) resetBasketPosition();
+  });
+
+  buildStarfield();
+  buildBasketPicker();
+  renderBasket();
+  resetBasketPosition();
+  scheduleShootingStars();
+})();
+</script>
+
+</body>
+</html>
